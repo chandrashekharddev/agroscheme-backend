@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AgroScheme AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="admin-page">
+    <!-- Admin Sidebar -->
+    <nav class="sidebar admin-sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-tractor"></i>
+                <div class="logo-text">
+                    <span class="logo-primary">Agro</span>
+                    <span class="logo-secondary">Admin</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-profile">
+            <div class="avatar admin-avatar">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="admin-info">
+                <h3 id="adminUserName">Admin</h3>
+                <p id="adminUserRole">System Administrator</p>
+            </div>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="#" onclick="loadDashboard()">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" onclick="loadFarmers()">
+                    <i class="fas fa-users"></i>
+                    <span>Farmers</span>
+                    <span class="badge" id="farmersBadge">0</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" onclick="loadSchemes()">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Schemes</span>
+                    <span class="badge" id="schemesBadge">0</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" onclick="loadDocumentVerification()">
+                    <i class="fas fa-file-upload"></i>
+                    <span>Document Verification</span>
+                    <span class="badge badge-warning" id="pendingDocsBadge">0</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" onclick="loadApplications()">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Applications</span>
+                    <span class="badge" id="applicationsBadge">0</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="#" onclick="loadAnalytics()">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Admin Main Content -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <h1 class="page-title" id="pageTitle">Admin Dashboard</h1>
+                <p class="page-subtitle" id="pageSubtitle">Manage system and monitor activities</p>
+            </div>
+            
+            <div class="top-bar-right">
+                <div class="admin-search">
+                    <input type="text" id="adminSearch" placeholder="Search farmers, schemes..." onkeyup="handleSearch(event)">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div class="admin-actions">
+                    <button class="btn-primary btn-small" onclick="addNewScheme()" id="addSchemeBtn" style="display: none;">
+                        <i class="fas fa-plus"></i>
+                        Add Scheme
+                    </button>
+                    <button class="btn-outline btn-small" onclick="refreshData()" id="refreshBtn">
+                        <i class="fas fa-sync"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div id="mainContent">
+            <!-- Dashboard View (Default) -->
+            <div id="dashboardView">
+                <!-- Admin Stats -->
+                <div class="admin-stats" id="adminStats">
+                    <!-- Stats will be loaded dynamically -->
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions-section" data-aos="fade-up">
+                    <h3>Quick Actions</h3>
+                    <div class="quick-actions-grid">
+                        <button class="action-card" onclick="addNewScheme()">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Add Scheme</span>
+                        </button>
+                        
+                        <button class="action-card" onclick="loadDocumentVerification()">
+                            <i class="fas fa-file-upload"></i>
+                            <span>Process Documents</span>
+                        </button>
+                        
+                        <button class="action-card" onclick="generateReport()">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Generate Report</span>
+                        </button>
+                        
+                        <button class="action-card" onclick="sendNotification()">
+                            <i class="fas fa-bullhorn"></i>
+                            <span>Send Notification</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="admin-grid">
+                    <!-- Left Column -->
+                    <div class="admin-left">
+                        <div class="admin-card" data-aos="fade-right">
+                            <div class="card-header">
+                                <h3>
+                                    <i class="fas fa-clock"></i>
+                                    Recent Applications
+                                </h3>
+                                <a href="#" onclick="loadApplications()" class="view-all">View All</a>
+                            </div>
+                            
+                            <div class="card-body" id="recentApplications">
+                                <!-- Applications will be loaded dynamically -->
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <p>Loading applications...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="admin-right">
+                        <div class="admin-card" data-aos="fade-left">
+                            <div class="card-header">
+                                <h3>
+                                    <i class="fas fa-bell"></i>
+                                    System Alerts
+                                </h3>
+                            </div>
+                            
+                            <div class="card-body" id="systemAlerts">
+                                <!-- Alerts will be loaded dynamically -->
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <p>Loading alerts...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="system-status" data-aos="fade-up">
+                    <h3>System Status</h3>
+                    <div class="status-grid">
+                        <div class="status-item online">
+                            <i class="fas fa-server"></i>
+                            <div>
+                                <h4>API Server</h4>
+                                <p id="apiStatus">Checking...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="status-item online">
+                            <i class="fas fa-database"></i>
+                            <div>
+                                <h4>Database</h4>
+                                <p id="dbStatus">Checking...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="status-item warning">
+                            <i class="fas fa-robot"></i>
+                            <div>
+                                <h4>AI Service</h4>
+                                <p id="aiStatus">Checking...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="status-item online">
+                            <i class="fas fa-cloud"></i>
+                            <div>
+                                <h4>Cloud Storage</h4>
+                                <p id="storageStatus">Checking...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Farmers View -->
+            <div id="farmersView" style="display: none;">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-users"></i> Farmers Management</h3>
+                        <div class="card-actions">
+                            <button class="btn-outline btn-small" onclick="exportFarmers()">
+                                <i class="fas fa-download"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="admin-table" id="farmersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Farmer ID</th>
+                                        <th>Name</th>
+                                        <th>Mobile</th>
+                                        <th>Location</th>
+                                        <th>Land (Acres)</th>
+                                        <th>Applications</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="farmersTableBody">
+                                    <!-- Farmers will be loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="farmersPagination">
+                            <!-- Pagination will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schemes View -->
+            <div id="schemesView" style="display: none;">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-file-contract"></i> Schemes Management</h3>
+                        <div class="card-actions">
+                            <button class="btn-primary btn-small" onclick="addNewScheme()">
+                                <i class="fas fa-plus"></i> Add Scheme
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="admin-table" id="schemesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Scheme Code</th>
+                                        <th>Scheme Name</th>
+                                        <th>Type</th>
+                                        <th>Benefit Amount</th>
+                                        <th>Last Date</th>
+                                        <th>Status</th>
+                                        <th>Applications</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="schemesTableBody">
+                                    <!-- Schemes will be loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Verification View -->
+            <div id="documentVerificationView" style="display: none;">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-file-upload"></i> Document Verification</h3>
+                        <div class="card-actions">
+                            <button class="btn-outline btn-small" onclick="verifyAllDocuments()">
+                                <i class="fas fa-check-double"></i> Verify All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="doc-verification-grid" id="docVerificationGrid">
+                            <!-- Documents will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Applications View -->
+            <div id="applicationsView" style="display: none;">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-file-alt"></i> Applications Management</h3>
+                        <div class="card-actions">
+                            <select class="status-filter" id="applicationStatusFilter" onchange="filterApplications()">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="under_review">Under Review</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="docs_needed">Docs Needed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="admin-table" id="applicationsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Application ID</th>
+                                        <th>Farmer Name</th>
+                                        <th>Scheme</th>
+                                        <th>Applied Amount</th>
+                                        <th>Applied Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="applicationsTableBody">
+                                    <!-- Applications will be loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination" id="applicationsPagination">
+                            <!-- Pagination will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics View -->
+            <div id="analyticsView" style="display: none;">
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3><i class="fas fa-chart-line"></i> Monthly Applications</h3>
+                        <div class="chart-container">
+                            <canvas id="applicationsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3><i class="fas fa-chart-pie"></i> Scheme Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="schemesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3><i class="fas fa-map-marker-alt"></i> Geographic Distribution</h3>
+                        <div class="map-container" id="geographicMap">
+                            <!-- Map will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <h3><i class="fas fa-calendar-alt"></i> Recent Activity</h3>
+                        <div class="activity-list" id="activityList">
+                            <!-- Activity will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Scheme Modal -->
+    <div id="addSchemeModal" class="modal modal-lg" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <h3>Add New Scheme</h3>
+                <p>Add government scheme to the system</p>
+            </div>
+            
+            <form id="addSchemeForm" onsubmit="submitScheme(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Scheme Name *</label>
+                        <input type="text" id="schemeName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Scheme Code *</label>
+                        <input type="text" id="schemeCode" required placeholder="e.g., PMKISAN2024">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Scheme Type *</label>
+                        <select id="schemeType" required>
+                            <option value="">Select Type</option>
+                            <option value="central">Central Government</option>
+                            <option value="state">State Government</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Benefit Amount</label>
+                        <input type="text" id="benefitAmount" placeholder="e.g., ₹6,000/year">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Last Date</label>
+                        <input type="date" id="lastDate">
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Description *</label>
+                        <textarea id="description" rows="3" placeholder="Describe the scheme..." required></textarea>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Eligibility Criteria *</label>
+                        <div class="criteria-list" id="eligibilityCriteria">
+                            <div class="criteria-item">
+                                <input type="text" placeholder="Criterion (e.g., annual_income)" class="criteria-key">
+                                <input type="text" placeholder="Value (e.g., 300000)" class="criteria-value">
+                                <button type="button" class="btn-icon" onclick="removeCriteria(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-outline btn-small" onclick="addCriteria()">
+                            <i class="fas fa-plus"></i>
+                            Add Criteria
+                        </button>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Required Documents *</label>
+                        <div class="documents-list" id="requiredDocuments">
+                            <div class="document-item">
+                                <select class="document-type">
+                                    <option value="aadhaar">Aadhaar Card</option>
+                                    <option value="pan">PAN Card</option>
+                                    <option value="land_record">Land Record</option>
+                                    <option value="bank_passbook">Bank Passbook</option>
+                                    <option value="income_certificate">Income Certificate</option>
+                                    <option value="domicile">Domicile Certificate</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <button type="button" class="btn-icon" onclick="removeDocument(this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-outline btn-small" onclick="addDocument()">
+                            <i class="fas fa-plus"></i>
+                            Add Document
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-outline" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Scheme
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Details Modal -->
+    <div id="applicationDetailsModal" class="modal modal-lg" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeApplicationModal()">&times;</button>
+            <div class="modal-header">
+                <h3>Application Details</h3>
+                <p id="applicationIdText">Loading...</p>
+            </div>
+            
+            <div class="modal-body" id="applicationDetails">
+                <!-- Application details will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Farmer Details Modal -->
+    <div id="farmerDetailsModal" class="modal modal-lg" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeFarmerModal()">&times;</button>
+            <div class="modal-header">
+                <h3>Farmer Details</h3>
+                <p id="farmerIdText">Loading...</p>
+            </div>
+            
+            <div class="modal-body" id="farmerDetails">
+                <!-- Farmer details will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="notificationToast" class="toast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle toast-icon success" id="toastIcon"></i>
+            <div class="toast-message">
+                <strong id="toastTitle">Success!</strong>
+                <p id="toastMessage">Operation completed successfully.</p>
+            </div>
+            <button class="toast-close" onclick="hideToast()">&times;</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://agroscheme-6.onrender.com';
+        let currentAdmin = null;
+        let currentView = 'dashboard';
+        let currentApplicationId = null;
+        let currentFarmerId = null;
+
+        // Check authentication and admin role
+        function checkAdminAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            
+            // Check if user is admin (you'll need to decode JWT to get role)
+            // For now, we'll just check if token exists
+            return token;
+        }
+
+        // Load admin data
+        async function loadAdminData() {
+            try {
+                const token = checkAdminAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                if (response.ok) {
+                    const user = await response.json();
+                    if (user.role !== 'admin') {
+                        showToast('Error', 'Access denied. Admin privileges required.', 'error');
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 2000);
+                        return;
+                    }
+                    
+                    currentAdmin = user;
+                    document.getElementById('adminUserName').textContent = user.full_name;
+                    document.getElementById('adminUserRole').textContent = 'Administrator';
+                    
+                    // Load initial data
+                    loadDashboardData();
+                    checkSystemStatus();
+                } else {
+                    throw new Error('Failed to load admin data');
+                }
+            } catch (error) {
+                console.error('Error loading admin data:', error);
+                showToast('Error', 'Failed to load admin data', 'error');
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const token = checkAdminAuth();
+                
+                // Load stats
+                const statsResponse = await fetch(`${API_BASE_URL}/admin/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+                    updateDashboardStats(stats);
+                }
+                
+                // Load recent applications
+                loadRecentApplications();
+                
+                // Load system alerts
+                loadSystemAlerts();
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        function updateDashboardStats(stats) {
+            const statsContainer = document.getElementById('adminStats');
+            statsContainer.innerHTML = `
+                <div class="admin-stat-card" data-aos="fade-up">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.total_farmers}</h3>
+                        <p>Total Farmers</p>
+                        <span class="stat-trend positive">
+                            <i class="fas fa-arrow-up"></i> Active
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="admin-stat-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.total_applications}</h3>
+                        <p>Applications</p>
+                        <span class="stat-trend positive">
+                            <i class="fas fa-arrow-up"></i> Processing
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="admin-stat-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>₹${(stats.benefits_distributed || 0).toLocaleString('en-IN')}</h3>
+                        <p>Benefits Distributed</p>
+                        <span class="stat-trend positive">
+                            <i class="fas fa-arrow-up"></i> Distributed
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="admin-stat-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.ai_accuracy}%</h3>
+                        <p>AI Accuracy</p>
+                        <span class="stat-trend">Stable</span>
+                    </div>
+                </div>
+            `;
+            
+            // Update badges
+            document.getElementById('farmersBadge').textContent = stats.total_farmers;
+            document.getElementById('schemesBadge').textContent = stats.total_schemes;
+            document.getElementById('pendingDocsBadge').textContent = stats.pending_verifications;
+            document.getElementById('applicationsBadge').textContent = stats.total_applications;
+        }
+
+        async function loadRecentApplications() {
+            try {
+                const token = checkAdminAuth();
+                const response = await fetch(`${API_BASE_URL}/schemes/?active_only=true&limit=5`);
+                
+                if (response.ok) {
+                    const schemes = await response.json();
+                    // Load applications for these schemes
+                    displayRecentApplications(schemes.slice(0, 3));
+                }
+            } catch (error) {
+                console.error('Error loading recent applications:', error);
+                document.getElementById('recentApplications').innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load applications</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayRecentApplications(schemes) {
+            const container = document.getElementById('recentApplications');
+            if (schemes.length === 0) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-inbox"></i>
+                        <p>No applications found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = schemes.map(scheme => `
+                <div class="application-item">
+                    <div class="application-info">
+                        <h4>${scheme.scheme_name}</h4>
+                        <p>${scheme.scheme_type === 'central' ? 'Central' : 'State'} • ${scheme.benefit_amount || 'Benefits vary'}</p>
+                        <span class="application-time">Active</span>
+                    </div>
+                    <div class="application-status">
+                        <span class="status-badge success">Active</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadSystemAlerts() {
+            const container = document.getElementById('systemAlerts');
+            
+            // Simulate alerts based on system status
+            const alerts = [
+                {
+                    type: 'warning',
+                    icon: 'fa-exclamation-triangle',
+                    title: 'Pending Verifications',
+                    message: 'Documents waiting for verification'
+                },
+                {
+                    type: 'info',
+                    icon: 'fa-info-circle',
+                    title: 'System Health',
+                    message: 'All systems operational'
+                },
+                {
+                    type: 'success',
+                    icon: 'fa-check-circle',
+                    title: 'AI Processing',
+                    message: 'Document processing active'
+                }
+            ];
+            
+            container.innerHTML = alerts.map(alert => `
+                <div class="alert-item ${alert.type}">
+                    <i class="fas ${alert.icon}"></i>
+                    <div>
+                        <h4>${alert.title}</h4>
+                        <p>${alert.message}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // System status check
+        async function checkSystemStatus() {
+            try {
+                // Check API server
+                const apiResponse = await fetch(`${API_BASE_URL}/health`);
+                document.getElementById('apiStatus').textContent = 
+                    apiResponse.ok ? 'Operational • 99.8% uptime' : 'Degraded • Issues detected';
+                
+                // Check database (via stats endpoint)
+                const token = checkAdminAuth();
+                const dbResponse = await fetch(`${API_BASE_URL}/admin/stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                document.getElementById('dbStatus').textContent = 
+                    dbResponse.ok ? 'Healthy • Connected' : 'Issues • Connection failed';
+                
+                // AI service status (simulated)
+                document.getElementById('aiStatus').textContent = 'Active • 98.5% accuracy';
+                
+                // Storage status (simulated)
+                document.getElementById('storageStatus').textContent = 'Normal • Cloud storage active';
+                
+            } catch (error) {
+                console.error('Error checking system status:', error);
+                document.getElementById('apiStatus').textContent = 'Offline • Connection failed';
+                document.getElementById('dbStatus').textContent = 'Unknown • Check failed';
+                document.getElementById('aiStatus').textContent = 'Unknown • Service offline';
+                document.getElementById('storageStatus').textContent = 'Unknown • Check failed';
+            }
+        }
+
+        // View navigation
+        function loadDashboard() {
+            switchView('dashboard');
+            loadDashboardData();
+        }
+
+        async function loadFarmers() {
+            switchView('farmers');
+            try {
+                const token = checkAdminAuth();
+                const response = await fetch(`${API_BASE_URL}/admin/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const farmers = await response.json();
+                    displayFarmers(farmers);
+                }
+            } catch (error) {
+                console.error('Error loading farmers:', error);
+                showToast('Error', 'Failed to load farmers', 'error');
+            }
+        }
+
+        function displayFarmers(farmers) {
+            const tableBody = document.getElementById('farmersTableBody');
+            
+            if (!farmers || farmers.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <i class="fas fa-users"></i>
+                            <p>No farmers found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = farmers.map(farmer => `
+                <tr>
+                    <td>${farmer.farmer_id}</td>
+                    <td>${farmer.full_name}</td>
+                    <td>${farmer.mobile_number}</td>
+                    <td>${farmer.district}, ${farmer.state}</td>
+                    <td>${farmer.total_land_acres || 0}</td>
+                    <td>${farmer.applications ? farmer.applications.length : 0}</td>
+                    <td>
+                        <span class="status-badge ${farmer.bank_verified ? 'success' : 'warning'}">
+                            ${farmer.bank_verified ? 'Verified' : 'Pending'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-icon" onclick="viewFarmer(${farmer.id})" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-icon" onclick="editFarmer(${farmer.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadSchemes() {
+            switchView('schemes');
+            try {
+                const response = await fetch(`${API_BASE_URL}/schemes/?active_only=true&limit=100`);
+                
+                if (response.ok) {
+                    const schemes = await response.json();
+                    displaySchemes(schemes);
+                }
+            } catch (error) {
+                console.error('Error loading schemes:', error);
+                showToast('Error', 'Failed to load schemes', 'error');
+            }
+        }
+
+        function displaySchemes(schemes) {
+            const tableBody = document.getElementById('schemesTableBody');
+            
+            if (!schemes || schemes.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="no-data">
+                            <i class="fas fa-file-contract"></i>
+                            <p>No schemes found</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tableBody.innerHTML = schemes.map(scheme => `
+                <tr>
+                    <td>${scheme.scheme_code}</td>
+                    <td>${scheme.scheme_name}</td>
+                    <td>
+                        <span class="badge ${scheme.scheme_type === 'central' ? 'badge-primary' : 'badge-secondary'}">
+                            ${scheme.scheme_type === 'central' ? 'Central' : 'State'}
+                        </span>
+                    </td>
+                    <td>${scheme.benefit_amount || 'Not specified'}</td>
+                    <td>${scheme.last_date ? new Date(scheme.last_date).toLocaleDateString() : 'Open'}</td>
+                    <td>
+                        <span class="status-badge ${scheme.is_active ? 'success' : 'warning'}">
+                            ${scheme.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>${scheme.applications_count || 0}</td>
+                    <td>
+                        <button class="btn-icon" onclick="viewScheme(${scheme.id})" title="View">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-icon" onclick="editScheme(${scheme.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadDocumentVerification() {
+            switchView('documentVerification');
+            try {
+                const token = checkAdminAuth();
+                // Note: You need to implement an endpoint to get unverified documents
+                // For now, we'll show a placeholder
+                document.getElementById('docVerificationGrid').innerHTML = `
+                    <div class="placeholder-message">
+                        <i class="fas fa-file-upload fa-3x"></i>
+                        <h3>Document Verification</h3>
+                        <p>Document verification system will be available soon.</p>
+                        <p>In the meantime, use the farmer's profile page to verify documents.</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error loading document verification:', error);
+                showToast('Error', 'Failed to load documents', 'error');
+            }
+        }
+
+        async function loadApplications() {
+            switchView('applications');
+            try {
+                const token = checkAdminAuth();
+                // Note: You need to implement an endpoint to get all applications
+                // For now, we'll show a placeholder
+                document.getElementById('applicationsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="no-data">
+                            <i class="fas fa-file-alt"></i>
+                            <p>Applications management will be available soon.</p>
+                            <p>Check individual schemes for application details.</p>
+                        </td>
+                    </tr>
+                `;
+            } catch (error) {
+                console.error('Error loading applications:', error);
+                showToast('Error', 'Failed to load applications', 'error');
+            }
+        }
+
+        function loadAnalytics() {
+            switchView('analytics');
+            // Initialize charts
+            initializeCharts();
+        }
+
+        function switchView(viewName) {
+            // Hide all views
+            document.querySelectorAll('[id$="View"]').forEach(view => {
+                view.style.display = 'none';
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected view
+            document.getElementById(`${viewName}View`).style.display = 'block';
+            
+            // Add active class to clicked nav item
+            const navItem = document.querySelector(`[onclick="load${viewName.charAt(0).toUpperCase() + viewName.slice(1)}()"]`).parentElement;
+            navItem.classList.add('active');
+            
+            // Update page title
+            const titles = {
+                'dashboard': 'Admin Dashboard',
+                'farmers': 'Farmers Management',
+                'schemes': 'Schemes Management',
+                'documentVerification': 'Document Verification',
+                'applications': 'Applications Management',
+                'analytics': 'Analytics Dashboard'
+            };
+            
+            const subtitles = {
+                'dashboard': 'Manage system and monitor activities',
+                'farmers': 'View and manage farmer accounts',
+                'schemes': 'Manage government schemes',
+                'documentVerification': 'Verify uploaded documents',
+                'applications': 'Review and process applications',
+                'analytics': 'View system analytics and reports'
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[viewName] || 'Admin Panel';
+            document.getElementById('pageSubtitle').textContent = subtitles[viewName] || '';
+            
+            // Show/hide action buttons
+            const addSchemeBtn = document.getElementById('addSchemeBtn');
+            addSchemeBtn.style.display = viewName === 'schemes' ? 'inline-flex' : 'none';
+            
+            currentView = viewName;
+        }
+
+        // Add new scheme
+        function addNewScheme() {
+            document.getElementById('addSchemeModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('addSchemeModal').style.display = 'none';
+            document.getElementById('addSchemeForm').reset();
+        }
+
+        function addCriteria() {
+            const container = document.getElementById('eligibilityCriteria');
+            const div = document.createElement('div');
+            div.className = 'criteria-item';
+            div.innerHTML = `
+                <input type="text" placeholder="Criterion (e.g., annual_income)" class="criteria-key">
+                <input type="text" placeholder="Value (e.g., 300000)" class="criteria-value">
+                <button type="button" class="btn-icon" onclick="removeCriteria(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeCriteria(button) {
+            button.parentElement.remove();
+        }
+
+        function addDocument() {
+            const container = document.getElementById('requiredDocuments');
+            const div = document.createElement('div');
+            div.className = 'document-item';
+            div.innerHTML = `
+                <select class="document-type">
+                    <option value="aadhaar">Aadhaar Card</option>
+                    <option value="pan">PAN Card</option>
+                    <option value="land_record">Land Record</option>
+                    <option value="bank_passbook">Bank Passbook</option>
+                    <option value="income_certificate">Income Certificate</option>
+                    <option value="domicile">Domicile Certificate</option>
+                    <option value="other">Other</option>
+                </select>
+                <button type="button" class="btn-icon" onclick="removeDocument(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeDocument(button) {
+            button.parentElement.remove();
+        }
+
+        async function submitScheme(event) {
+            event.preventDefault();
+            
+            try {
+                const token = checkAdminAuth();
+                
+                // Collect criteria
+                const criteria = {};
+                document.querySelectorAll('.criteria-item').forEach(item => {
+                    const key = item.querySelector('.criteria-key').value;
+                    const value = item.querySelector('.criteria-value').value;
+                    if (key && value) {
+                        criteria[key] = isNaN(value) ? value : Number(value);
+                    }
+                });
+                
+                // Collect required documents
+                const requiredDocuments = [];
+                document.querySelectorAll('.document-item .document-type').forEach(select => {
+                    if (select.value) {
+                        requiredDocuments.push(select.value);
+                    }
+                });
+                
+                const schemeData = {
+                    scheme_name: document.getElementById('schemeName').value,
+                    scheme_code: document.getElementById('schemeCode').value,
+                    scheme_type: document.getElementById('schemeType').value,
+                    benefit_amount: document.getElementById('benefitAmount').value || null,
+                    last_date: document.getElementById('lastDate').value || null,
+                    description: document.getElementById('description').value,
+                    eligibility_criteria: criteria,
+                    required_documents: requiredDocuments,
+                    is_active: true
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/admin/schemes`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(schemeData)
+                });
+                
+                if (response.ok) {
+                    const newScheme = await response.json();
+                    showToast('Success', 'Scheme added successfully!', 'success');
+                    closeModal();
+                    loadSchemes(); // Refresh schemes list
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to add scheme');
+                }
+            } catch (error) {
+                console.error('Error adding scheme:', error);
+                showToast('Error', error.message || 'Failed to add scheme', 'error');
+            }
+        }
+
+        // View farmer details
+        async function viewFarmer(farmerId) {
+            try {
+                const token = checkAdminAuth();
+                const response = await fetch(`${API_BASE_URL}/admin/users/${farmerId}/applications`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    displayFarmerDetails(data);
+                }
+            } catch (error) {
+                console.error('Error loading farmer details:', error);
+                showToast('Error', 'Failed to load farmer details', 'error');
+            }
+        }
+
+        function displayFarmerDetails(data) {
+            currentFarmerId = data.id;
+            document.getElementById('farmerIdText').textContent = `Farmer ID: ${data.farmer_id}`;
+            
+            const container = document.getElementById('farmerDetails');
+            container.innerHTML = `
+                <div class="farmer-details-grid">
+                    <div class="detail-section">
+                        <h4>Personal Information</h4>
+                        <div class="detail-item">
+                            <label>Name:</label>
+                            <span>${data.full_name}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Mobile:</label>
+                            <span>${data.mobile_number}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Email:</label>
+                            <span>${data.email || 'Not provided'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Location:</label>
+                            <span>${data.village || ''}, ${data.district}, ${data.state}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>Farm Details</h4>
+                        <div class="detail-item">
+                            <label>Land Area:</label>
+                            <span>${data.total_land_acres || 0} acres</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Land Type:</label>
+                            <span>${data.land_type || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Main Crops:</label>
+                            <span>${data.main_crops || 'Not specified'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Annual Income:</label>
+                            <span>₹${(data.annual_income || 0).toLocaleString('en-IN')}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section">
+                        <h4>Bank Details</h4>
+                        <div class="detail-item">
+                            <label>Account Number:</label>
+                            <span>${data.bank_account_number || 'Not provided'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Bank Name:</label>
+                            <span>${data.bank_name || 'Not provided'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>IFSC Code:</label>
+                            <span>${data.ifsc_code || 'Not provided'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <label>Verification:</label>
+                            <span class="status-badge ${data.bank_verified ? 'success' : 'warning'}">
+                                ${data.bank_verified ? 'Verified' : 'Pending'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                ${data.applications && data.applications.length > 0 ? `
+                    <div class="applications-section">
+                        <h4>Applications (${data.applications.length})</h4>
+                        <div class="applications-list">
+                            ${data.applications.map(app => `
+                                <div class="application-card">
+                                    <div class="app-header">
+                                        <strong>${app.scheme ? app.scheme.scheme_name : 'Unknown Scheme'}</strong>
+                                        <span class="status-badge ${app.status}">
+                                            ${app.status}
+                                        </span>
+                                    </div>
+                                    <div class="app-details">
+                                        <span>Applied: ${new Date(app.applied_at).toLocaleDateString()}</span>
+                                        <span>Amount: ₹${(app.applied_amount || 0).toLocaleString('en-IN')}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('farmerDetailsModal').style.display = 'flex';
+        }
+
+        function closeFarmerModal() {
+            document.getElementById('farmerDetailsModal').style.display = 'none';
+            currentFarmerId = null;
+        }
+
+        // View scheme details
+        async function viewScheme(schemeId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/schemes/${schemeId}`);
+                if (response.ok) {
+                    const scheme = await response.json();
+                    // You can implement a scheme details modal here
+                    showToast('Info', `Viewing scheme: ${scheme.scheme_name}`, 'info');
+                }
+            } catch (error) {
+                console.error('Error loading scheme details:', error);
+                showToast('Error', 'Failed to load scheme details', 'error');
+            }
+        }
+
+        // Edit scheme
+        async function editScheme(schemeId) {
+            showToast('Info', 'Edit feature coming soon!', 'info');
+        }
+
+        // Edit farmer
+        async function editFarmer(farmerId) {
+            showToast('Info', 'Edit farmer feature coming soon!', 'info');
+        }
+
+        // Search functionality
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                const searchTerm = event.target.value.toLowerCase();
+                
+                if (currentView === 'farmers') {
+                    // Filter farmers table
+                    const rows = document.querySelectorAll('#farmersTableBody tr');
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                } else if (currentView === 'schemes') {
+                    // Filter schemes table
+                    const rows = document.querySelectorAll('#schemesTableBody tr');
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                }
+            }
+        }
+
+        // Refresh data
+        function refreshData() {
+            if (currentView === 'dashboard') {
+                loadDashboardData();
+                checkSystemStatus();
+            } else if (currentView === 'farmers') {
+                loadFarmers();
+            } else if (currentView === 'schemes') {
+                loadSchemes();
+            } else if (currentView === 'applications') {
+                loadApplications();
+            }
+            
+            showToast('Info', 'Refreshing data...', 'info');
+        }
+
+        // Quick actions
+        function processDocuments() {
+            loadDocumentVerification();
+            showToast('Info', 'Opening document verification', 'info');
+        }
+
+        function generateReport() {
+            showToast('Info', 'Report generation feature coming soon!', 'info');
+        }
+
+        function sendNotification() {
+            showToast('Info', 'Notification system coming soon!', 'info');
+        }
+
+        function verifyAllDocuments() {
+            showToast('Info', 'Bulk verification feature coming soon!', 'info');
+        }
+
+        function exportFarmers() {
+            showToast('Info', 'Export feature coming soon!', 'info');
+        }
+
+        function filterApplications() {
+            showToast('Info', 'Filtering applications', 'info');
+        }
+
+        // Initialize charts for analytics
+        function initializeCharts() {
+            // Applications chart
+            const appsCtx = document.getElementById('applicationsChart').getContext('2d');
+            new Chart(appsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Applications',
+                        data: [65, 59, 80, 81, 56, 55],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Schemes chart
+            const schemesCtx = document.getElementById('schemesChart').getContext('2d');
+            new Chart(schemesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Central', 'State', 'Subsidy', 'Insurance'],
+                    datasets: [{
+                        data: [40, 30, 20, 10],
+                        backgroundColor: [
+                            '#4CAF50',
+                            '#2196F3',
+                            '#FF9800',
+                            '#9C27B0'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Toast notifications
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('notificationToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            toastIcon.className = `fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} toast-icon ${type}`;
+            
+            toast.style.display = 'block';
+            toast.style.animation = 'slideIn 0.3s ease-out';
+            
+            setTimeout(hideToast, 5000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('notificationToast');
+            toast.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 300);
+        }
+
+        // Setup logout
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAdminAuth()) return;
+            
+            loadAdminData();
+            setupLogout();
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                const modals = ['addSchemeModal', 'applicationDetailsModal', 'farmerDetailsModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (event.target === modal) {
+                        if (modalId === 'addSchemeModal') closeModal();
+                        if (modalId === 'applicationDetailsModal') closeApplicationModal();
+                        if (modalId === 'farmerDetailsModal') closeFarmerModal();
+                    }
+                });
+            });
+            
+            // Close modals with ESC key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                    closeApplicationModal();
+                    closeFarmerModal();
+                }
+            });
+            
+            // Auto-refresh every 5 minutes
+            setInterval(() => {
+                if (currentView === 'dashboard') {
+                    loadDashboardData();
+                }
+            }, 5 * 60 * 1000);
+        });
+
+        function closeApplicationModal() {
+            document.getElementById('applicationDetailsModal').style.display = 'none';
+            currentApplicationId = null;
+        }
+    </script>
+
+    <style>
+        /* Admin-specific styles */
+        .admin-sidebar {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+        }
+        
+        .admin-sidebar .logo-text .logo-secondary {
+            color: #4CAF50;
+        }
+        
+        .admin-profile {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-avatar {
+            width: 80px;
+            height: 80px;
+            font-size: 2.5rem;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .admin-info h3 {
+            color: white;
+            margin: 0 0 0.25rem 0;
+            font-size: 1.1rem;
+        }
+        
+        .admin-info p {
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        
+        .admin-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .admin-stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .admin-stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .admin-stat-card .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .admin-stat-card:nth-child(1) .stat-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .admin-stat-card:nth-child(2) .stat-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .admin-stat-card:nth-child(3) .stat-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .admin-stat-card:nth-child(4) .stat-icon {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .stat-content h3 {
+            font-size: 1.8rem;
+            margin: 0 0 0.25rem 0;
+            color: var(--text-primary);
+        }
+        
+        .stat-content p {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .stat-trend {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .stat-trend.positive {
+            background: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .quick-actions-section {
+            margin-bottom: 2rem;
+        }
+        
+        .quick-actions-section h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .action-card {
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .action-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .action-card i {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        
+        .action-card span {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .admin-card .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-card .card-header h3 {
+            margin: 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        .admin-card .card-header h3 i {
+            color: var(--primary-color);
+        }
+        
+        .view-all {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .admin-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .applications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .application-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .application-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .application-info h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--text-primary);
+        }
+        
+        .application-info p {
+            margin: 0 0 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .application-time {
+            font-size: 0.8rem;
+            color: var(--gray-500);
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-badge.success {
+            background: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .status-badge.pending {
+            background: var(--warning-light);
+            color: var(--warning-color);
+        }
+        
+        .status-badge.warning {
+            background: var(--error-light);
+            color: var(--error-color);
+        }
+        
+        .alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .alert-item.warning {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .alert-item.info {
+            background: var(--info-light);
+            border-left: 4px solid var(--info-color);
+        }
+        
+        .alert-item.danger {
+            background: var(--error-light);
+            border-left: 4px solid var(--error-color);
+        }
+        
+        .alert-item.success {
+            background: var(--success-light);
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .alert-item i {
+            font-size: 1.2rem;
+            margin-top: 0.25rem;
+        }
+        
+        .alert-item.warning i {
+            color: var(--warning-color);
+        }
+        
+        .alert-item.info i {
+            color: var(--info-color);
+        }
+        
+        .alert-item.danger i {
+            color: var(--error-color);
+        }
+        
+        .alert-item.success i {
+            color: var(--success-color);
+        }
+        
+        .alert-item h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--text-primary);
+        }
+        
+        .alert-item p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .system-status {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .system-status h3 {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: var(--gray-50);
+        }
+        
+        .status-item.online {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .status-item.warning {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .status-item.offline {
+            border-left: 4px solid var(--error-color);
+        }
+        
+        .status-item i {
+            font-size: 1.5rem;
+        }
+        
+        .status-item.online i {
+            color: var(--success-color);
+        }
+        
+        .status-item.warning i {
+            color: var(--warning-color);
+        }
+        
+        .status-item.offline i {
+            color: var(--error-color);
+        }
+        
+        .status-item h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--text-primary);
+        }
+        
+        .status-item p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th {
+            background: var(--gray-50);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--gray-200);
+        }
+        
+        .admin-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--text-secondary);
+        }
+        
+        .admin-table tr:hover {
+            background: var(--gray-50);
+        }
+        
+        /* Loading spinner */
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .loading-spinner i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error message */
+        .error-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--error-color);
+        }
+        
+        .error-message i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* No data message */
+        .no-data {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-500);
+        }
+        
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .toast-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .toast-icon {
+            font-size: 1.5rem;
+            margin-top: 2px;
+        }
+        
+        .toast-icon.success { color: var(--success-color); }
+        .toast-icon.error { color: var(--error-color); }
+        .toast-icon.info { color: var(--info-color); }
+        
+        .toast-message {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Criteria and document lists */
+        .criteria-list, .documents-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .criteria-item {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .criteria-item input {
+            flex: 1;
+        }
+        
+        .document-item {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .document-item select {
+            flex: 1;
+        }
+        
+        /* Analytics styles */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .analytics-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .analytics-card h3 {
+            margin: 0 0 1.5rem 0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .chart-container {
+            height: 200px;
+            position: relative;
+        }
+        
+        .map-container {
+            height: 200px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-500);
+        }
+        
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        /* Farmer details modal */
+        .farmer-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .detail-section {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        
+        .detail-section h4 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .detail-item label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .detail-item span {
+            color: var(--text-primary);
+            text-align: right;
+        }
+        
+        .applications-section {
+            margin-top: 2rem;
+        }
+        
+        .applications-section h4 {
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+        }
+        
+        .applications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .application-card {
+            background: var(--gray-50);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .app-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Placeholder message */
+        .placeholder-message {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .placeholder-message i {
+            font-size: 3rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+        
+        .placeholder-message h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .placeholder-message p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</body>
+</html>

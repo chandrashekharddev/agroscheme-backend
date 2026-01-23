@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - AgroScheme AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="profile-page">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-tractor"></i>
+                <div class="logo-text">
+                    <span class="logo-primary">Agro</span>
+                    <span class="logo-secondary">Scheme</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Profile -->
+        <div class="user-profile">
+            <div class="avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+                <h3 id="userName">Loading...</h3>
+                <p class="farmer-id" id="farmerId">ID: Loading...</p>
+                <p class="user-location" id="userLocation">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Loading...
+                </p>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="upload.html">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Upload Documents</span>
+                    <span class="badge" id="pendingDocsBadge">0</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="schemes.html">
+                    <i class="fas fa-file-contract"></i>
+                    <span>My Schemes</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="profile.html">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" id="notificationsLink">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="badge badge-primary" id="notificationBadge">0</span>
+                </a>
+            </li>
+        </ul>
+        
+        <!-- Auto Apply Toggle -->
+        <div class="auto-apply-toggle">
+            <div class="toggle-label">
+                <i class="fas fa-robot"></i>
+                <span>Auto Apply</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="autoApplyToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <!-- Logout -->
+        <div class="sidebar-footer">
+            <a href="#" class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <h1 class="page-title">My Profile</h1>
+                <p class="page-subtitle">Manage your account and preferences</p>
+            </div>
+            
+            <div class="top-bar-right">
+                <button class="btn-outline" id="editProfileBtn" onclick="toggleEditMode()">
+                    <i class="fas fa-edit"></i>
+                    Edit Profile
+                </button>
+                <button class="btn-primary" id="saveProfileBtn" onclick="saveProfile()" style="display: none;">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </header>
+
+        <!-- Profile Overview -->
+        <div class="profile-overview" data-aos="fade-up">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <div class="avatar-large">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <button class="btn-icon" onclick="changeAvatar()" title="Change photo">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h2 id="profileName">Loading...</h2>
+                        <div class="profile-meta">
+                            <span class="profile-id">
+                                <i class="fas fa-id-card"></i>
+                                Farmer ID: <span id="profileFarmerId">Loading...</span>
+                            </span>
+                            <span class="profile-location" id="profileLocation">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Loading...
+                            </span>
+                        </div>
+                        
+                        <div class="profile-stats" id="profileStats">
+                            <!-- Stats will be loaded dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-status" id="profileStatus">
+                    <!-- Status items will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Tabs -->
+        <div class="profile-tabs" data-aos="fade-up">
+            <button class="profile-tab active" data-tab="personal" onclick="switchTab('personal')">
+                <i class="fas fa-user"></i>
+                Personal Info
+            </button>
+            <button class="profile-tab" data-tab="farm" onclick="switchTab('farm')">
+                <i class="fas fa-tractor"></i>
+                Farm Details
+            </button>
+            <button class="profile-tab" data-tab="documents" onclick="switchTab('documents')">
+                <i class="fas fa-file-alt"></i>
+                Documents
+            </button>
+            <button class="profile-tab" data-tab="settings" onclick="switchTab('settings')">
+                <i class="fas fa-cog"></i>
+                Settings
+            </button>
+        </div>
+
+        <!-- Personal Info Tab -->
+        <div class="tab-content active" id="personalTab">
+            <div class="form-card" data-aos="fade-up">
+                <h3>
+                    <i class="fas fa-user-circle"></i>
+                    Personal Information
+                </h3>
+                
+                <form id="personalForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="fullName" value="" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Mobile Number</label>
+                            <div class="verified-input">
+                                <input type="tel" id="mobileNumber" value="" readonly>
+                                <span class="verified-badge">
+                                    <i class="fas fa-check"></i> Verified
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="email" value="" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>State</label>
+                            <select id="state" disabled>
+                                <option value="">Select State</option>
+                                <!-- States will be populated dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>District</label>
+                            <input type="text" id="district" value="" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Village/Town</label>
+                            <input type="text" id="village" value="" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Preferred Language</label>
+                            <select id="language" disabled>
+                                <option value="en">English</option>
+                                <option value="hi">हिंदी</option>
+                                <option value="mr">मराठी</option>
+                                <option value="ta">தமிழ்</option>
+                                <option value="te">తెలుగు</option>
+                                <option value="bn">বাংলা</option>
+                                <option value="gu">ગુજરાતી</option>
+                                <option value="kn">ಕನ್ನಡ</option>
+                                <option value="ml">മലയാളം</option>
+                                <option value="pa">ਪੰਜਾਬੀ</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Farm Details Tab -->
+        <div class="tab-content" id="farmTab" style="display: none;">
+            <div class="form-card" data-aos="fade-up">
+                <h3>
+                    <i class="fas fa-tractor"></i>
+                    Farm Details
+                </h3>
+                
+                <div class="farm-summary" id="farmSummary">
+                    <!-- Farm summary will be loaded dynamically -->
+                </div>
+                
+                <form id="farmForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Total Land (Acres)</label>
+                            <input type="number" id="totalLand" value="0" readonly step="0.1" min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Type of Land</label>
+                            <select id="landType" disabled>
+                                <option value="">Select Land Type</option>
+                                <option value="irrigated">Irrigated Land</option>
+                                <option value="rainfed">Rainfed Land</option>
+                                <option value="dryland">Dryland</option>
+                                <option value="wetland">Wetland</option>
+                                <option value="garden">Garden Land</option>
+                                <option value="orchard">Orchard</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Main Crops (comma separated)</label>
+                            <input type="text" id="mainCrops" value="" readonly placeholder="e.g., Sugarcane, Wheat, Rice">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Annual Income (₹)</label>
+                            <input type="number" id="annualIncome" value="0" readonly min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Bank Account Number</label>
+                            <div class="verified-input">
+                                <input type="text" id="bankAccount" value="" readonly>
+                                <span class="verified-badge" id="bankVerifiedBadge" style="display: none;">
+                                    <i class="fas fa-check"></i> Verified
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Bank Name</label>
+                            <input type="text" id="bankName" value="" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>IFSC Code</label>
+                            <input type="text" id="ifscCode" value="" readonly>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Documents Tab -->
+        <div class="tab-content" id="documentsTab" style="display: none;">
+            <div class="documents-card" data-aos="fade-up">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-file-alt"></i>
+                        My Documents
+                    </h3>
+                    <a href="upload.html" class="btn-primary btn-small">
+                        <i class="fas fa-upload"></i>
+                        Upload More
+                    </a>
+                </div>
+                
+                <div class="documents-summary" id="documentsSummary">
+                    <!-- Summary will be loaded dynamically -->
+                </div>
+                
+                <div class="documents-list" id="documentsList">
+                    <!-- Documents will be loaded dynamically -->
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading documents...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settingsTab" style="display: none;">
+            <div class="settings-card" data-aos="fade-up">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-cog"></i>
+                        Account Settings
+                    </h3>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>Notification Preferences</h4>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h5>Email Notifications</h5>
+                            <p>Receive scheme alerts via email</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="emailNotifications" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h5>SMS Alerts</h5>
+                            <p>Important alerts via SMS</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="smsNotifications" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h5>Auto-Apply</h5>
+                            <p>Automatically apply for eligible schemes</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="autoApply" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>Security</h4>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h5>Change Password</h5>
+                            <p>Update your account password</p>
+                        </div>
+                        <button class="btn-outline btn-small" onclick="showChangePassword()">
+                            Change
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h4>Preferences</h4>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <h5>Preferred Language</h5>
+                            <p>Select interface language</p>
+                        </div>
+                        <select class="language-select" id="preferredLanguage" onchange="updateLanguagePreference()">
+                            <option value="en">English</option>
+                            <option value="hi">हिंदी</option>
+                            <option value="mr">मराठी</option>
+                            <option value="ta">தமிழ்</option>
+                            <option value="te">తెలుగు</option>
+                            <option value="bn">বাংলা</option>
+                            <option value="gu">ગુજરાતી</option>
+                            <option value="kn">ಕನ್ನಡ</option>
+                            <option value="ml">മലയാളം</option>
+                            <option value="pa">ਪੰਜਾਬੀ</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="danger-zone">
+                    <h4>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Danger Zone
+                    </h4>
+                    
+                    <div class="danger-item">
+                        <div>
+                            <h5>Delete Account</h5>
+                            <p>Permanently delete your account and all data</p>
+                        </div>
+                        <button class="btn-danger" onclick="showDeleteAccountConfirmation()">
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePasswordModal()">&times;</button>
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <p>Enter your current and new password</p>
+            </div>
+            
+            <form id="changePasswordForm" onsubmit="submitPasswordChange(event)">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" required minlength="6">
+                    <small>Minimum 6 characters</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-outline" onclick="closePasswordModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary">
+                        Change Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Account Confirmation Modal -->
+    <div id="deleteAccountModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            <div class="modal-header">
+                <h3>Delete Account</h3>
+                <p>This action cannot be undone</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="warning-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h4>Warning: This is a permanent action</h4>
+                    <p>All your data including:</p>
+                    <ul>
+                        <li>Profile information</li>
+                        <li>Uploaded documents</li>
+                        <li>Scheme applications</li>
+                        <li>Notification history</li>
+                    </ul>
+                    <p>will be permanently deleted and cannot be recovered.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Enter your password to confirm:</label>
+                    <input type="password" id="deletePassword" required>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn-outline" onclick="closeDeleteModal()">
+                    Cancel
+                </button>
+                <button type="button" class="btn-danger" onclick="confirmDeleteAccount()">
+                    <i class="fas fa-trash"></i>
+                    Delete My Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="notificationToast" class="toast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle toast-icon success" id="toastIcon"></i>
+            <div class="toast-message">
+                <strong id="toastTitle">Success!</strong>
+                <p id="toastMessage">Operation completed successfully.</p>
+            </div>
+            <button class="toast-close" onclick="hideToast()">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://agroscheme-6.onrender.com';
+        let currentUser = null;
+        let userDocuments = [];
+        let userApplications = [];
+        let isEditMode = false;
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return token;
+        }
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    updateUserProfileUI();
+                    loadUserDocuments();
+                    loadUserApplications();
+                    loadDashboardStats();
+                    loadNotifications();
+                } else {
+                    throw new Error('Failed to load user data');
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showToast('Error', 'Failed to load profile data', 'error');
+            }
+        }
+
+        // Update user profile UI
+        function updateUserProfileUI() {
+            // Sidebar
+            document.getElementById('userName').textContent = currentUser.full_name;
+            document.getElementById('farmerId').textContent = `ID: ${currentUser.farmer_id}`;
+            document.getElementById('userLocation').innerHTML = 
+                `<i class="fas fa-map-marker-alt"></i> ${currentUser.district}, ${currentUser.state}`;
+            
+            // Profile Overview
+            document.getElementById('profileName').textContent = currentUser.full_name;
+            document.getElementById('profileFarmerId').textContent = currentUser.farmer_id;
+            document.getElementById('profileLocation').innerHTML = 
+                `${currentUser.village || ''}, ${currentUser.district}, ${currentUser.state}`;
+            
+            // Personal Info Tab
+            document.getElementById('fullName').value = currentUser.full_name;
+            document.getElementById('mobileNumber').value = currentUser.mobile_number;
+            document.getElementById('email').value = currentUser.email || '';
+            document.getElementById('state').value = currentUser.state;
+            document.getElementById('district').value = currentUser.district;
+            document.getElementById('village').value = currentUser.village || '';
+            document.getElementById('language').value = currentUser.language || 'en';
+            
+            // Farm Details Tab
+            document.getElementById('totalLand').value = currentUser.total_land_acres || 0;
+            document.getElementById('landType').value = currentUser.land_type || '';
+            document.getElementById('mainCrops').value = currentUser.main_crops || '';
+            document.getElementById('annualIncome').value = currentUser.annual_income || 0;
+            document.getElementById('bankAccount').value = currentUser.bank_account_number || '';
+            document.getElementById('bankName').value = currentUser.bank_name || '';
+            document.getElementById('ifscCode').value = currentUser.ifsc_code || '';
+            
+            // Update bank verification badge
+            if (currentUser.bank_verified) {
+                document.getElementById('bankVerifiedBadge').style.display = 'inline-block';
+            }
+            
+            // Settings Tab
+            document.getElementById('emailNotifications').checked = currentUser.email_notifications !== false;
+            document.getElementById('smsNotifications').checked = currentUser.sms_notifications !== false;
+            document.getElementById('autoApply').checked = currentUser.auto_apply_enabled !== false;
+            document.getElementById('preferredLanguage').value = currentUser.language || 'en';
+            document.getElementById('autoApplyToggle').checked = currentUser.auto_apply_enabled !== false;
+            
+            // Update farm summary
+            updateFarmSummary();
+            
+            // Update profile status
+            updateProfileStatus();
+        }
+
+        // Update farm summary
+        function updateFarmSummary() {
+            const farmSummary = document.getElementById('farmSummary');
+            farmSummary.innerHTML = `
+                <div class="farm-stat">
+                    <i class="fas fa-mountain"></i>
+                    <div>
+                        <strong>${currentUser.total_land_acres || 0} Acres</strong>
+                        <span>Total Land</span>
+                    </div>
+                </div>
+                <div class="farm-stat">
+                    <i class="fas fa-seedling"></i>
+                    <div>
+                        <strong>${currentUser.main_crops ? currentUser.main_crops.split(',').length : 0} Crops</strong>
+                        <span>${currentUser.main_crops || 'Not specified'}</span>
+                    </div>
+                </div>
+                <div class="farm-stat">
+                    <i class="fas fa-rupee-sign"></i>
+                    <div>
+                        <strong>₹${(currentUser.annual_income || 0).toLocaleString('en-IN')}</strong>
+                        <span>Annual Income</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update profile status
+        function updateProfileStatus() {
+            const profileStatus = document.getElementById('profileStatus');
+            const hasAadhaar = userDocuments.some(doc => doc.document_type === 'aadhaar' && doc.verified);
+            const hasBank = userDocuments.some(doc => doc.document_type === 'bank_passbook' && doc.verified);
+            const hasLandRecord = userDocuments.some(doc => doc.document_type === 'land_record' && doc.verified);
+            
+            profileStatus.innerHTML = `
+                <div class="status-item ${hasAadhaar ? 'verified' : 'pending'}">
+                    <i class="fas ${hasAadhaar ? 'fa-check-circle' : 'fa-clock'}"></i>
+                    <span>${hasAadhaar ? 'Identity Verified' : 'Identity Pending'}</span>
+                </div>
+                <div class="status-item ${hasBank ? 'verified' : 'pending'}">
+                    <i class="fas ${hasBank ? 'fa-check-circle' : 'fa-university'}"></i>
+                    <span>${hasBank ? 'Bank Verified' : 'Bank Details Pending'}</span>
+                </div>
+                <div class="status-item ${hasLandRecord ? 'verified' : 'pending'}">
+                    <i class="fas ${hasLandRecord ? 'fa-check-circle' : 'fa-map'}"></i>
+                    <span>${hasLandRecord ? 'Land Record Verified' : 'Land Record Pending'}</span>
+                </div>
+                <div class="status-item ${currentUser.auto_apply_enabled ? 'active' : 'inactive'}">
+                    <i class="fas fa-robot"></i>
+                    <span>Auto-Apply ${currentUser.auto_apply_enabled ? 'Active' : 'Inactive'}</span>
+                </div>
+            `;
+        }
+
+        // Load user documents
+        async function loadUserDocuments() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/documents`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    userDocuments = await response.json();
+                    updateDocumentsUI();
+                    
+                    // Update pending docs badge
+                    const pendingDocs = userDocuments.filter(doc => !doc.verified).length;
+                    document.getElementById('pendingDocsBadge').textContent = pendingDocs;
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+            }
+        }
+
+        // Update documents UI
+        function updateDocumentsUI() {
+            // Update summary
+            const verifiedCount = userDocuments.filter(doc => doc.verified).length;
+            const pendingCount = userDocuments.filter(doc => !doc.verified).length;
+            
+            document.getElementById('documentsSummary').innerHTML = `
+                <div class="summary-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>${verifiedCount}</strong>
+                        <span>Verified</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>${pendingCount}</strong>
+                        <span>Pending</span>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>
+                        <strong>${getRequiredDocumentsCount()}</strong>
+                        <span>Required</span>
+                    </div>
+                </div>
+            `;
+            
+            // Update documents list
+            const documentsList = document.getElementById('documentsList');
+            if (userDocuments.length === 0) {
+                documentsList.innerHTML = `
+                    <div class="no-documents">
+                        <i class="fas fa-inbox"></i>
+                        <h4>No documents uploaded</h4>
+                        <p>Upload your documents to apply for schemes</p>
+                        <a href="upload.html" class="btn-primary">
+                            <i class="fas fa-upload"></i>
+                            Upload Documents
+                        </a>
+                    </div>
+                `;
+            } else {
+                documentsList.innerHTML = userDocuments.map(doc => `
+                    <div class="document-item ${doc.verified ? 'verified' : 'pending'}">
+                        <div class="document-icon">
+                            <i class="fas fa-${getDocumentIcon(doc.document_type)}"></i>
+                        </div>
+                        <div class="document-info">
+                            <h4>${formatDocumentType(doc.document_type)}</h4>
+                            <p>Uploaded: ${formatDate(doc.uploaded_at)} • ${formatFileSize(doc.file_size)}</p>
+                            <span class="document-status ${doc.verified ? 'verified' : 'pending'}">
+                                <i class="fas fa-${doc.verified ? 'check' : 'clock'}"></i>
+                                ${doc.verified ? 'AI Verified' : 'Processing'}
+                            </span>
+                        </div>
+                        <div class="document-actions">
+                            <button class="btn-icon" title="View" onclick="viewDocument('${doc.file_path}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon" title="Download" onclick="downloadDocument('${doc.file_path}', '${doc.file_name}')">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function getDocumentIcon(docType) {
+            const icons = {
+                'aadhaar': 'id-card',
+                'pan': 'credit-card',
+                'land_record': 'map',
+                'bank_passbook': 'university',
+                'income_certificate': 'file-invoice-dollar',
+                'domicile': 'home',
+                'other': 'file'
+            };
+            return icons[docType] || 'file';
+        }
+
+        function formatDocumentType(docType) {
+            return docType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Unknown date';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            
+            return date.toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return 'Unknown size';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function getRequiredDocumentsCount() {
+            const requiredDocs = ['aadhaar', 'bank_passbook', 'land_record'];
+            const userDocTypes = userDocuments.map(d => d.document_type);
+            return requiredDocs.filter(doc => !userDocTypes.includes(doc)).length;
+        }
+
+        // Load user applications
+        async function loadUserApplications() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/applications`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    userApplications = await response.json();
+                    updateProfileStats();
+                }
+            } catch (error) {
+                console.error('Error loading applications:', error);
+            }
+        }
+
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/dashboard-stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    updateProfileStats(stats);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function updateProfileStats(stats = null) {
+            const appliedCount = userApplications.length;
+            const eligibleCount = stats ? stats.eligible_schemes : 0;
+            const profileComplete = calculateProfileComplete();
+            
+            document.getElementById('profileStats').innerHTML = `
+                <div class="profile-stat">
+                    <strong>${eligibleCount}</strong>
+                    <span>Eligible Schemes</span>
+                </div>
+                <div class="profile-stat">
+                    <strong>${appliedCount}</strong>
+                    <span>Applied</span>
+                </div>
+                <div class="profile-stat">
+                    <strong>${profileComplete}%</strong>
+                    <span>Profile Complete</span>
+                </div>
+            `;
+        }
+
+        function calculateProfileComplete() {
+            let score = 0;
+            const maxScore = 100;
+            
+            // Basic info (30 points)
+            if (currentUser.full_name) score += 10;
+            if (currentUser.mobile_number) score += 10;
+            if (currentUser.state && currentUser.district) score += 10;
+            
+            // Farm details (30 points)
+            if (currentUser.total_land_acres) score += 10;
+            if (currentUser.main_crops) score += 10;
+            if (currentUser.annual_income) score += 10;
+            
+            // Bank details (20 points)
+            if (currentUser.bank_account_number) score += 10;
+            if (currentUser.ifsc_code) score += 10;
+            
+            // Documents (20 points)
+            const hasAadhaar = userDocuments.some(doc => doc.document_type === 'aadhaar');
+            const hasBank = userDocuments.some(doc => doc.document_type === 'bank_passbook');
+            
+            if (hasAadhaar) score += 10;
+            if (hasBank) score += 10;
+            
+            return Math.min(Math.round(score), 100);
+        }
+
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/notifications?unread_only=true`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const notifications = await response.json();
+                    document.getElementById('notificationBadge').textContent = notifications.length;
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}Tab`).style.display = 'block';
+            
+            // Update tab buttons
+            document.querySelectorAll('.profile-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Load tab-specific data if needed
+            if (tabName === 'documents' && userDocuments.length === 0) {
+                loadUserDocuments();
+            }
+        }
+
+        // Toggle edit mode
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            
+            const editBtn = document.getElementById('editProfileBtn');
+            const saveBtn = document.getElementById('saveProfileBtn');
+            
+            if (isEditMode) {
+                editBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-flex';
+                
+                // Enable editable fields
+                const editableFields = ['district', 'village', 'totalLand', 'landType', 'mainCrops', 
+                                      'annualIncome', 'bankAccount', 'bankName', 'ifscCode', 'language'];
+                
+                editableFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.readOnly = false;
+                        if (field.tagName === 'SELECT') {
+                            field.disabled = false;
+                        }
+                    }
+                });
+                
+                showToast('Info', 'Edit mode enabled. Make your changes and click Save.', 'info');
+            } else {
+                editBtn.style.display = 'inline-flex';
+                saveBtn.style.display = 'none';
+                
+                // Disable fields
+                const editableFields = ['district', 'village', 'totalLand', 'landType', 'mainCrops', 
+                                      'annualIncome', 'bankAccount', 'bankName', 'ifscCode', 'language'];
+                
+                editableFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        field.readOnly = true;
+                        if (field.tagName === 'SELECT') {
+                            field.disabled = true;
+                        }
+                    }
+                });
+            }
+        }
+
+        // Save profile
+        async function saveProfile() {
+            try {
+                const token = checkAuth();
+                
+                const updateData = {
+                    district: document.getElementById('district').value,
+                    village: document.getElementById('village').value,
+                    total_land_acres: parseFloat(document.getElementById('totalLand').value) || 0,
+                    land_type: document.getElementById('landType').value,
+                    main_crops: document.getElementById('mainCrops').value,
+                    annual_income: parseFloat(document.getElementById('annualIncome').value) || 0,
+                    bank_account_number: document.getElementById('bankAccount').value,
+                    bank_name: document.getElementById('bankName').value,
+                    ifsc_code: document.getElementById('ifscCode').value,
+                    language: document.getElementById('language').value,
+                    email_notifications: document.getElementById('emailNotifications').checked,
+                    sms_notifications: document.getElementById('smsNotifications').checked,
+                    auto_apply_enabled: document.getElementById('autoApply').checked
+                };
+                
+                const response = await fetch(`${API_BASE_URL}/farmers/me`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                if (response.ok) {
+                    const updatedUser = await response.json();
+                    currentUser = updatedUser;
+                    
+                    toggleEditMode();
+                    updateUserProfileUI();
+                    showToast('Success', 'Profile updated successfully!', 'success');
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                showToast('Error', error.message || 'Failed to update profile', 'error');
+            }
+        }
+
+        // View document
+        function viewDocument(filePath) {
+            const fullUrl = `${API_BASE_URL}/${filePath}`;
+            window.open(fullUrl, '_blank');
+        }
+
+        // Download document
+        function downloadDocument(filePath, fileName) {
+            const fullUrl = `${API_BASE_URL}/${filePath}`;
+            const link = document.createElement('a');
+            link.href = fullUrl;
+            link.download = fileName || 'document';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Change password
+        function showChangePassword() {
+            document.getElementById('changePasswordModal').style.display = 'flex';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+            document.getElementById('changePasswordForm').reset();
+        }
+
+        async function submitPasswordChange(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showToast('Error', 'New passwords do not match', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                showToast('Error', 'Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mobile_number: currentUser.mobile_number,
+                        password: currentPassword
+                    })
+                });
+                
+                if (!response.ok) {
+                    showToast('Error', 'Current password is incorrect', 'error');
+                    return;
+                }
+                
+                // Note: In a real application, you would need an API endpoint to change password
+                // Since your backend doesn't have a password change endpoint yet,
+                // we'll show a success message but note that the backend needs to be updated
+                
+                showToast('Info', 'Password change feature requires backend update', 'info');
+                closePasswordModal();
+                
+            } catch (error) {
+                console.error('Error changing password:', error);
+                showToast('Error', 'Failed to change password', 'error');
+            }
+        }
+
+        // Update language preference
+        function updateLanguagePreference() {
+            const language = document.getElementById('preferredLanguage').value;
+            
+            // Update in UI
+            document.getElementById('language').value = language;
+            
+            // Save if in edit mode
+            if (isEditMode) {
+                // Language will be saved when user clicks Save
+                showToast('Info', 'Language preference will be saved when you click Save', 'info');
+            }
+        }
+
+        // Delete account
+        function showDeleteAccountConfirmation() {
+            document.getElementById('deleteAccountModal').style.display = 'flex';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteAccountModal').style.display = 'none';
+            document.getElementById('deletePassword').value = '';
+        }
+
+        async function confirmDeleteAccount() {
+            const password = document.getElementById('deletePassword').value;
+            
+            if (!password) {
+                showToast('Error', 'Please enter your password', 'error');
+                return;
+            }
+            
+            // Note: Your backend doesn't have a delete account endpoint yet
+            // This is a placeholder for when you add that functionality
+            
+            showToast('Info', 'Account deletion feature requires backend implementation', 'info');
+            closeDeleteModal();
+            
+            // Uncomment this when you implement the delete endpoint
+            /*
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/auth/delete-account`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password })
+                });
+                
+                if (response.ok) {
+                    localStorage.removeItem('token');
+                    showToast('Success', 'Account deleted successfully', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to delete account');
+                }
+            } catch (error) {
+                console.error('Error deleting account:', error);
+                showToast('Error', error.message || 'Failed to delete account', 'error');
+            }
+            */
+        }
+
+        // Setup logout
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Toast notifications
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('notificationToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            toastIcon.className = `fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} toast-icon ${type}`;
+            
+            toast.style.display = 'block';
+            toast.style.animation = 'slideIn 0.3s ease-out';
+            
+            setTimeout(hideToast, 5000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('notificationToast');
+            toast.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 300);
+        }
+
+        // Change avatar (placeholder)
+        function changeAvatar() {
+            showToast('Info', 'Avatar change feature coming soon!', 'info');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) return;
+            
+            loadUserData();
+            setupLogout();
+            
+            // Setup notifications link
+            document.getElementById('notificationsLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                showToast('Info', 'Notifications feature coming soon!', 'info');
+            });
+            
+            // Auto-apply toggle
+            document.getElementById('autoApplyToggle').addEventListener('change', function() {
+                document.getElementById('autoApply').checked = this.checked;
+            });
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                const modals = ['changePasswordModal', 'deleteAccountModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (event.target === modal) {
+                        if (modalId === 'changePasswordModal') closePasswordModal();
+                        if (modalId === 'deleteAccountModal') closeDeleteModal();
+                    }
+                });
+            });
+            
+            // Close modals with ESC key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closePasswordModal();
+                    closeDeleteModal();
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Additional styles for dynamic content */
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .loading-spinner i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .no-documents {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+        
+        .no-documents i {
+            font-size: 3rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+        
+        .document-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 8px;
+            background: var(--gray-50);
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .document-item:hover {
+            background: var(--gray-100);
+            transform: translateY(-2px);
+        }
+        
+        .document-item.verified {
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .document-item.pending {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .document-item.required {
+            border-left: 4px solid var(--error-color);
+        }
+        
+        .document-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-right: 1rem;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .document-info {
+            flex: 1;
+        }
+        
+        .document-info h4 {
+            margin: 0 0 0.25rem 0;
+            color: var(--text-primary);
+        }
+        
+        .document-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .document-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+        
+        .document-status.verified {
+            background: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .document-status.pending {
+            background: var(--warning-light);
+            color: var(--warning-color);
+        }
+        
+        .document-status.required {
+            background: var(--error-light);
+            color: var(--error-color);
+        }
+        
+        .document-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .warning-message {
+            background: var(--warning-light);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--warning-color);
+        }
+        
+        .warning-message i {
+            color: var(--warning-color);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .warning-message ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .warning-message li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .toast-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .toast-icon {
+            font-size: 1.5rem;
+            margin-top: 2px;
+        }
+        
+        .toast-icon.success { color: var(--success-color); }
+        .toast-icon.error { color: var(--error-color); }
+        .toast-icon.info { color: var(--info-color); }
+        
+        .toast-message {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Profile status styles */
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .status-item.verified {
+            background: var(--success-light);
+            color: var(--success-color);
+        }
+        
+        .status-item.pending {
+            background: var(--warning-light);
+            color: var(--warning-color);
+        }
+        
+        .status-item.active {
+            background: var(--primary-light);
+            color: var(--primary-color);
+        }
+        
+        .status-item.inactive {
+            background: var(--gray-200);
+            color: var(--gray-600);
+        }
+        
+        /* Farm summary styles */
+        .farm-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .farm-stat {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+        
+        .farm-stat i {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        
+        .farm-stat strong {
+            display: block;
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+        
+        .farm-stat span {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</body>
+</html>

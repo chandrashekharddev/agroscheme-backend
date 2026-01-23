@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Schemes - AgroScheme AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="schemes-page">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-tractor"></i>
+                <div class="logo-text">
+                    <span class="logo-primary">Agro</span>
+                    <span class="logo-secondary">Scheme</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Profile -->
+        <div class="user-profile">
+            <div class="avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+                <h3 id="userName">Loading...</h3>
+                <p class="farmer-id" id="farmerId">ID: Loading...</p>
+                <p class="user-location" id="userLocation">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Loading...
+                </p>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="dashboard.html">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="upload.html">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Upload Documents</span>
+                    <span class="badge" id="pendingDocsBadge">0</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a href="schemes.html">
+                    <i class="fas fa-file-contract"></i>
+                    <span>My Schemes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="profile.html">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" id="notificationsLink">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="badge badge-primary" id="notificationBadge">0</span>
+                </a>
+            </li>
+        </ul>
+        
+        <!-- Auto Apply Toggle -->
+        <div class="auto-apply-toggle">
+            <div class="toggle-label">
+                <i class="fas fa-robot"></i>
+                <span>Auto Apply</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="autoApplyToggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        
+        <!-- Logout -->
+        <div class="sidebar-footer">
+            <a href="#" class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <h1 class="page-title">Available Schemes</h1>
+                <p class="page-subtitle">Find and apply for government schemes</p>
+            </div>
+            
+            <div class="top-bar-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search schemes..." id="schemeSearch">
+                </div>
+                
+                <div class="filter-buttons">
+                    <button class="btn-outline btn-small active" data-filter="all">All</button>
+                    <button class="btn-outline btn-small" data-filter="eligible">Eligible</button>
+                    <button class="btn-outline btn-small" data-filter="central">Central</button>
+                    <button class="btn-outline btn-small" data-filter="state">State</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scheme Stats -->
+        <div class="scheme-stats" data-aos="fade-up" id="schemeStats">
+            <!-- Stats will be loaded dynamically -->
+        </div>
+
+        <!-- Scheme Categories -->
+        <div class="category-tabs" data-aos="fade-up">
+            <div class="category active" data-category="all">
+                <i class="fas fa-layer-group"></i>
+                <span>All Schemes</span>
+            </div>
+            <div class="category" data-category="central">
+                <i class="fas fa-flag"></i>
+                <span>Central Govt</span>
+            </div>
+            <div class="category" data-category="state">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>State Govt</span>
+            </div>
+            <div class="category" data-category="urgent">
+                <i class="fas fa-bolt"></i>
+                <span>Ending Soon</span>
+                <span class="badge" id="urgentBadge">0</span>
+            </div>
+        </div>
+
+        <!-- Scheme Grid -->
+        <div class="scheme-grid" id="schemeGrid">
+            <!-- Schemes will be loaded dynamically -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading schemes...</p>
+            </div>
+        </div>
+
+        <!-- View More -->
+        <div class="view-more" data-aos="fade-up" id="loadMoreContainer" style="display: none;">
+            <button class="btn-secondary" id="loadMoreBtn">
+                <i class="fas fa-arrow-down"></i>
+                Load More Schemes
+            </button>
+        </div>
+    </main>
+
+    <!-- Scheme Details Modal -->
+    <div id="schemeDetailsModal" class="modal modal-lg" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            
+            <div class="modal-header">
+                <div class="scheme-icon-large" id="modalSchemeIcon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <div class="scheme-header-content">
+                    <h3 id="modalSchemeTitle">Scheme Title</h3>
+                    <div class="scheme-tags" id="modalSchemeTags">
+                        <span class="tag tag-success">Eligible</span>
+                        <span class="tag">Central Government</span>
+                        <span class="tag tag-highlight">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="modal-grid">
+                    <!-- Left Column -->
+                    <div class="modal-left">
+                        <div class="detail-section">
+                            <h4>
+                                <i class="fas fa-info-circle"></i>
+                                Scheme Details
+                            </h4>
+                            <p id="modalSchemeDescription">
+                                Loading scheme details...
+                            </p>
+                            
+                            <div class="benefits" id="modalBenefits">
+                                <h5>Benefits:</h5>
+                                <ul id="benefitsList">
+                                    <!-- Benefits will be added here -->
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>
+                                <i class="fas fa-calendar-alt"></i>
+                                Important Dates
+                            </h4>
+                            <div class="dates-grid" id="datesGrid">
+                                <!-- Dates will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column -->
+                    <div class="modal-right">
+                        <div class="detail-section">
+                            <h4>
+                                <i class="fas fa-user-check"></i>
+                                Your Eligibility
+                            </h4>
+                            <div class="eligibility-status" id="eligibilityStatus">
+                                <!-- Eligibility will be added here -->
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4>
+                                <i class="fas fa-file-alt"></i>
+                                Required Documents
+                            </h4>
+                            <div class="documents-list" id="requiredDocuments">
+                                <!-- Documents will be added here -->
+                            </div>
+                        </div>
+                        
+                        <div class="application-preview">
+                            <h4>Application Preview</h4>
+                            <div class="preview-details" id="applicationPreview">
+                                <!-- Preview will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <div class="confirmation-check">
+                        <label class="checkbox">
+                            <input type="checkbox" id="schemeConfirmation" checked>
+                            <span>Apply for this scheme using my verified information</span>
+                        </label>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-outline" onclick="closeModal()">
+                            Cancel
+                        </button>
+                        <button class="btn-primary" id="confirmApplyBtn" onclick="applyForScheme()">
+                            <i class="fas fa-paper-plane"></i>
+                            <span id="applyBtnText">Confirm & Apply</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="toast">
+        <div class="toast-content">
+            <i class="fas fa-check-circle toast-icon success"></i>
+            <div class="toast-message">
+                <strong id="toastTitle">Success!</strong>
+                <p id="toastMessage">Operation completed successfully.</p>
+            </div>
+            <button class="toast-close" onclick="hideToast()">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://agroscheme-6.onrender.com';
+        let currentUser = null;
+        let currentSchemeId = null;
+        let allSchemes = [];
+        let userApplications = [];
+        let userDocuments = [];
+
+        // Check authentication
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return token;
+        }
+
+        // Load user data
+        async function loadUserData() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    
+                    // Update UI
+                    document.getElementById('userName').textContent = currentUser.full_name;
+                    document.getElementById('farmerId').textContent = `ID: ${currentUser.farmer_id}`;
+                    document.getElementById('userLocation').innerHTML = 
+                        `<i class="fas fa-map-marker-alt"></i> ${currentUser.district}, ${currentUser.state}`;
+                    
+                    // Load other data
+                    loadDashboardStats();
+                    loadNotifications();
+                    loadUserDocuments();
+                    loadUserApplications();
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showToast('Error', 'Failed to load user data', 'error');
+            }
+        }
+
+        // Load dashboard stats
+        async function loadDashboardStats() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/dashboard-stats`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    updateStatsUI(stats);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function updateStatsUI(stats) {
+            const statsContainer = document.getElementById('schemeStats');
+            statsContainer.innerHTML = `
+                <div class="stat-card stat-primary">
+                    <div class="stat-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.eligible_schemes || 0}</h3>
+                        <p>Eligible for You</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card stat-success">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>${stats.applied_schemes || 0}</h3>
+                        <p>Applied</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card stat-warning">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>₹${(stats.benefits_this_year || 0).toLocaleString('en-IN')}</h3>
+                        <p>Total Benefits</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load schemes
+        async function loadSchemes() {
+            try {
+                showLoading(true);
+                const response = await fetch(`${API_BASE_URL}/schemes/?active_only=true&limit=50`);
+                
+                if (response.ok) {
+                    allSchemes = await response.json();
+                    renderSchemes(allSchemes);
+                    
+                    // Update urgent badge
+                    const urgentCount = allSchemes.filter(s => {
+                        if (!s.last_date) return false;
+                        const lastDate = new Date(s.last_date);
+                        const now = new Date();
+                        const daysDiff = Math.ceil((lastDate - now) / (1000 * 60 * 60 * 24));
+                        return daysDiff <= 30 && daysDiff > 0;
+                    }).length;
+                    
+                    document.getElementById('urgentBadge').textContent = urgentCount;
+                }
+            } catch (error) {
+                console.error('Error loading schemes:', error);
+                showToast('Error', 'Failed to load schemes', 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function renderSchemes(schemes) {
+            const schemeGrid = document.getElementById('schemeGrid');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            if (schemes.length === 0) {
+                schemeGrid.innerHTML = `
+                    <div class="no-schemes">
+                        <i class="fas fa-inbox"></i>
+                        <h3>No schemes available</h3>
+                        <p>Check back later for new schemes</p>
+                    </div>
+                `;
+                return;
+            }
+
+            loadingSpinner.style.display = 'none';
+            schemeGrid.innerHTML = '';
+
+            schemes.forEach((scheme, index) => {
+                const userApp = userApplications.find(app => app.scheme_id === scheme.id);
+                const isApplied = !!userApp;
+                const isUrgent = checkIfUrgent(scheme.last_date);
+                
+                let statusClass = 'eligible';
+                let statusText = 'Eligible';
+                let badgeClass = '';
+                
+                if (isApplied) {
+                    statusClass = 'applied';
+                    statusText = userApp.status.charAt(0).toUpperCase() + userApp.status.slice(1);
+                    badgeClass = 'success';
+                }
+                
+                const schemeCard = document.createElement('div');
+                schemeCard.className = `scheme-card ${statusClass}`;
+                schemeCard.setAttribute('data-aos', 'fade-up');
+                if (index > 0) {
+                    schemeCard.setAttribute('data-aos-delay', `${Math.min(index * 100, 300)}`);
+                }
+                
+                schemeCard.innerHTML = `
+                    <div class="scheme-badge ${badgeClass}">${statusText}</div>
+                    <div class="scheme-header">
+                        <div class="scheme-icon">
+                            ${getSchemeIcon(scheme.scheme_type)}
+                        </div>
+                        <div class="scheme-type">${scheme.scheme_type === 'central' ? 'Central' : 'State'}</div>
+                    </div>
+                    
+                    <div class="scheme-body">
+                        <h3>${scheme.scheme_name}</h3>
+                        <p class="scheme-description">
+                            ${scheme.description ? scheme.description.substring(0, 100) : 'No description available'}...
+                        </p>
+                        
+                        <div class="scheme-details">
+                            <div class="detail">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span>${scheme.benefit_amount || 'Varies'}</span>
+                            </div>
+                            <div class="detail">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>${scheme.last_date ? formatDate(scheme.last_date) : 'Ongoing'}</span>
+                            </div>
+                            <div class="detail">
+                                <i class="fas fa-percentage"></i>
+                                <span>Check Eligibility</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="scheme-footer">
+                        ${isApplied ? 
+                            `<button class="btn-outline" onclick="trackApplication(${userApp.id})">
+                                <i class="fas fa-eye"></i>
+                                Track Status
+                            </button>` :
+                            `<button class="btn-primary" onclick="showSchemeDetails(${scheme.id})">
+                                <i class="fas fa-info-circle"></i>
+                                View Details
+                            </button>`
+                        }
+                    </div>
+                `;
+                
+                schemeGrid.appendChild(schemeCard);
+            });
+        }
+
+        function getSchemeIcon(type) {
+            const icons = {
+                'central': '<i class="fas fa-flag"></i>',
+                'state': '<i class="fas fa-map-marker-alt"></i>'
+            };
+            return icons[type] || '<i class="fas fa-seedling"></i>';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'No date';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function checkIfUrgent(dateString) {
+            if (!dateString) return false;
+            const lastDate = new Date(dateString);
+            const now = new Date();
+            const daysDiff = Math.ceil((lastDate - now) / (1000 * 60 * 60 * 24));
+            return daysDiff <= 30 && daysDiff > 0;
+        }
+
+        // Show scheme details modal
+        async function showSchemeDetails(schemeId) {
+            try {
+                const token = checkAuth();
+                currentSchemeId = schemeId;
+                
+                // Get scheme details
+                const schemeResponse = await fetch(`${API_BASE_URL}/schemes/${schemeId}`);
+                if (!schemeResponse.ok) throw new Error('Failed to load scheme');
+                const scheme = await schemeResponse.json();
+                
+                // Check eligibility
+                const eligibilityResponse = await fetch(`${API_BASE_URL}/schemes/${schemeId}/check-eligibility`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const eligibility = eligibilityResponse.ok ? await eligibilityResponse.json() : null;
+                
+                // Update modal content
+                updateModalContent(scheme, eligibility);
+                
+                // Show modal
+                document.getElementById('schemeDetailsModal').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading scheme details:', error);
+                showToast('Error', 'Failed to load scheme details', 'error');
+            }
+        }
+
+        function updateModalContent(scheme, eligibility) {
+            // Update basic info
+            document.getElementById('modalSchemeTitle').textContent = scheme.scheme_name;
+            document.getElementById('modalSchemeIcon').innerHTML = getSchemeIcon(scheme.scheme_type);
+            document.getElementById('modalSchemeDescription').textContent = scheme.description || 'No description available';
+            
+            // Update tags
+            const tagsContainer = document.getElementById('modalSchemeTags');
+            tagsContainer.innerHTML = '';
+            
+            if (eligibility && eligibility.eligible) {
+                tagsContainer.innerHTML += `<span class="tag tag-success">Eligible (${eligibility.match_percentage}%)</span>`;
+            } else {
+                tagsContainer.innerHTML += `<span class="tag tag-warning">Check Eligibility</span>`;
+            }
+            
+            tagsContainer.innerHTML += `
+                <span class="tag">${scheme.scheme_type === 'central' ? 'Central Government' : 'State Government'}</span>
+                <span class="tag tag-highlight">${scheme.benefit_amount || 'Benefits Vary'}</span>
+            `;
+            
+            // Update benefits
+            const benefitsList = document.getElementById('benefitsList');
+            benefitsList.innerHTML = `
+                <li>${scheme.benefit_amount || 'Financial assistance provided'}</li>
+                <li>Direct transfer to bank account</li>
+                <li>Government verified scheme</li>
+            `;
+            
+            // Update dates
+            const datesGrid = document.getElementById('datesGrid');
+            datesGrid.innerHTML = `
+                <div class="date-item">
+                    <i class="fas fa-hourglass-start"></i>
+                    <div>
+                        <strong>Application Start</strong>
+                        <p>Always Open</p>
+                    </div>
+                </div>
+                <div class="date-item">
+                    <i class="fas fa-hourglass-end"></i>
+                    <div>
+                        <strong>Last Date</strong>
+                        <p>${scheme.last_date ? formatDate(scheme.last_date) : 'Not Specified'}</p>
+                    </div>
+                </div>
+                <div class="date-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <div>
+                        <strong>Disbursement</strong>
+                        <p>After Approval</p>
+                    </div>
+                </div>
+            `;
+            
+            // Update eligibility status
+            const eligibilityStatus = document.getElementById('eligibilityStatus');
+            if (eligibility) {
+                eligibilityStatus.innerHTML = `
+                    ${eligibility.eligible ? `
+                        <div class="eligibility-item success">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <strong>✓ Eligible</strong>
+                                <p>${eligibility.match_percentage}% criteria match</p>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="eligibility-item error">
+                            <i class="fas fa-times-circle"></i>
+                            <div>
+                                <strong>✗ Not Eligible</strong>
+                                <p>${eligibility.match_percentage}% criteria match</p>
+                            </div>
+                        </div>
+                    `}
+                    ${eligibility.reasons && eligibility.reasons.length > 0 ? `
+                        <div class="eligibility-item info">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Requirements</strong>
+                                <p>${eligibility.reasons.join(', ')}</p>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+            } else {
+                eligibilityStatus.innerHTML = `
+                    <div class="eligibility-item info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Check Eligibility</strong>
+                            <p>Click Apply to check eligibility</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Update required documents
+            const requiredDocs = document.getElementById('requiredDocuments');
+            const userDocTypes = userDocuments.filter(d => d.verified).map(d => d.document_type);
+            requiredDocs.innerHTML = '';
+            
+            if (scheme.required_documents && Array.isArray(scheme.required_documents)) {
+                scheme.required_documents.forEach(docType => {
+                    const hasDoc = userDocTypes.includes(docType);
+                    requiredDocs.innerHTML += `
+                        <div class="document-item ${hasDoc ? 'verified' : 'missing'}">
+                            <i class="fas fa-${getDocumentIcon(docType)}"></i>
+                            <div>
+                                <strong>${formatDocumentType(docType)}</strong>
+                                <p>${hasDoc ? '✓ Uploaded & Verified' : '✗ Required'}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Update application preview
+            const applicationPreview = document.getElementById('applicationPreview');
+            applicationPreview.innerHTML = `
+                <div class="preview-row">
+                    <span>Name:</span>
+                    <strong>${currentUser.full_name}</strong>
+                </div>
+                <div class="preview-row">
+                    <span>Farmer ID:</span>
+                    <strong>${currentUser.farmer_id}</strong>
+                </div>
+                <div class="preview-row">
+                    <span>Location:</span>
+                    <strong>${currentUser.village || ''}, ${currentUser.district}</strong>
+                </div>
+                <div class="preview-row">
+                    <span>Expected Benefit:</span>
+                    <strong class="highlight">${scheme.benefit_amount || 'To be determined'}</strong>
+                </div>
+            `;
+            
+            // Update apply button
+            const applyBtn = document.getElementById('confirmApplyBtn');
+            const applyBtnText = document.getElementById('applyBtnText');
+            
+            if (eligibility && !eligibility.eligible) {
+                applyBtn.disabled = true;
+                applyBtn.className = 'btn-disabled';
+                applyBtnText.textContent = 'Not Eligible';
+            } else if (eligibility && eligibility.missing_documents && eligibility.missing_documents.length > 0) {
+                applyBtn.disabled = true;
+                applyBtn.className = 'btn-disabled';
+                applyBtnText.textContent = 'Upload Required Documents';
+                applyBtn.onclick = () => window.location.href = 'upload.html';
+            } else {
+                applyBtn.disabled = false;
+                applyBtn.className = 'btn-primary';
+                applyBtnText.textContent = 'Confirm & Apply';
+                applyBtn.onclick = applyForScheme;
+            }
+        }
+
+        function getDocumentIcon(docType) {
+            const icons = {
+                'aadhaar': 'id-card',
+                'pan': 'credit-card',
+                'land_record': 'map',
+                'bank_passbook': 'university',
+                'income_certificate': 'file-invoice-dollar',
+                'domicile': 'home',
+                'other': 'file'
+            };
+            return icons[docType] || 'file';
+        }
+
+        function formatDocumentType(docType) {
+            return docType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        // Apply for scheme
+        async function applyForScheme() {
+            try {
+                const token = checkAuth();
+                const confirmBtn = document.getElementById('confirmApplyBtn');
+                const originalText = confirmBtn.innerHTML;
+                
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying...';
+                
+                const response = await fetch(`${API_BASE_URL}/schemes/${currentSchemeId}/apply`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const application = await response.json();
+                    showToast('Success', 'Application submitted successfully!', 'success');
+                    closeModal();
+                    
+                    // Reload data
+                    loadUserApplications();
+                    loadDashboardStats();
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Application failed');
+                }
+            } catch (error) {
+                console.error('Error applying for scheme:', error);
+                showToast('Error', error.message || 'Failed to apply for scheme', 'error');
+                
+                // Reset button
+                const confirmBtn = document.getElementById('confirmApplyBtn');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalText;
+            }
+        }
+
+        // Track application
+        function trackApplication(applicationId) {
+            // You can implement a tracking modal or redirect to applications page
+            showToast('Info', 'Redirecting to applications...', 'info');
+            setTimeout(() => {
+                // Redirect to applications page or open tracking modal
+                alert(`Track application ${applicationId}`);
+            }, 1000);
+        }
+
+        // Load user applications
+        async function loadUserApplications() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/applications`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    userApplications = await response.json();
+                }
+            } catch (error) {
+                console.error('Error loading applications:', error);
+            }
+        }
+
+        // Load user documents
+        async function loadUserDocuments() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/documents`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    userDocuments = await response.json();
+                    
+                    // Update pending docs badge
+                    const pendingDocs = userDocuments.filter(doc => !doc.verified).length;
+                    document.getElementById('pendingDocsBadge').textContent = pendingDocs;
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+            }
+        }
+
+        // Load notifications
+        async function loadNotifications() {
+            try {
+                const token = checkAuth();
+                const response = await fetch(`${API_BASE_URL}/farmers/notifications?unread_only=true`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const notifications = await response.json();
+                    document.getElementById('notificationBadge').textContent = notifications.length;
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+            }
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('schemeDetailsModal').style.display = 'none';
+            currentSchemeId = null;
+        }
+
+        // Show/hide loading
+        function showLoading(show) {
+            const spinner = document.getElementById('loadingSpinner');
+            spinner.style.display = show ? 'flex' : 'none';
+        }
+
+        // Toast notifications
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('notificationToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.querySelector('.toast-icon');
+            
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            toastIcon.className = `fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} toast-icon ${type}`;
+            
+            toast.style.display = 'block';
+            toast.style.animation = 'slideIn 0.3s ease-out';
+            
+            setTimeout(hideToast, 5000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('notificationToast');
+            toast.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 300);
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('schemeSearch');
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const filteredSchemes = allSchemes.filter(scheme => 
+                    scheme.scheme_name.toLowerCase().includes(searchTerm) ||
+                    scheme.description.toLowerCase().includes(searchTerm) ||
+                    scheme.scheme_code.toLowerCase().includes(searchTerm)
+                );
+                renderSchemes(filteredSchemes);
+            });
+        }
+
+        // Filter functionality
+        function setupFilters() {
+            const filterButtons = document.querySelectorAll('.filter-buttons button');
+            const categoryTabs = document.querySelectorAll('.category-tabs .category');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    
+                    // Update active state
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    filterSchemes(filter);
+                });
+            });
+            
+            categoryTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const category = this.getAttribute('data-category');
+                    
+                    // Update active state
+                    categoryTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    filterSchemes(category);
+                });
+            });
+        }
+
+        function filterSchemes(filter) {
+            let filtered = allSchemes;
+            
+            if (filter === 'eligible') {
+                // This would require checking eligibility for each scheme
+                // For now, just show all
+                filtered = allSchemes;
+            } else if (filter === 'central') {
+                filtered = allSchemes.filter(s => s.scheme_type === 'central');
+            } else if (filter === 'state') {
+                filtered = allSchemes.filter(s => s.scheme_type === 'state');
+            } else if (filter === 'urgent') {
+                filtered = allSchemes.filter(s => checkIfUrgent(s.last_date));
+            }
+            // 'all' shows all schemes
+            
+            renderSchemes(filtered);
+        }
+
+        // Setup logout
+        function setupLogout() {
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('token');
+                window.location.href = 'index.html';
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!checkAuth()) return;
+            
+            loadUserData();
+            loadSchemes();
+            setupSearch();
+            setupFilters();
+            setupLogout();
+            
+            // Setup notifications link
+            document.getElementById('notificationsLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                showToast('Info', 'Notifications feature coming soon!', 'info');
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('schemeDetailsModal');
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Close modal with ESC key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Additional styles for dynamic content */
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            grid-column: 1 / -1;
+        }
+        
+        .loading-spinner i {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .no-schemes {
+            text-align: center;
+            padding: 4rem 2rem;
+            grid-column: 1 / -1;
+        }
+        
+        .no-schemes i {
+            font-size: 4rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+        }
+        
+        .btn-disabled {
+            background-color: var(--gray-300) !important;
+            color: var(--gray-600) !important;
+            cursor: not-allowed !important;
+            opacity: 0.7;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 1rem;
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .toast-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .toast-icon {
+            font-size: 1.5rem;
+            margin-top: 2px;
+        }
+        
+        .toast-icon.success { color: var(--success-color); }
+        .toast-icon.error { color: var(--error-color); }
+        .toast-icon.info { color: var(--info-color); }
+        
+        .toast-message {
+            flex: 1;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--gray-500);
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</body>
+</html>
