@@ -1364,366 +1364,442 @@
         </button>
     </div>
 
-    <script>
-        // Configuration
-        const API_BASE_URL = 'https://agroscheme-6.onrender.com';
-        let currentStep = 1;
-        let farmerData = {};
+   <script>
+    // Configuration
+    const API_BASE_URL = 'https://agroscheme-6.onrender.com';
+    let currentStep = 1;
+    let farmerData = {};
 
-        // DOM Elements
-        const step1Form = document.getElementById('registrationForm');
-        const step2Form = document.getElementById('step2Form');
-        const submitBtn = document.getElementById('submitBtn');
-        const passwordMatch = document.getElementById('passwordMatch');
-        const strengthText = document.getElementById('strengthText');
-        const strengthBar = document.querySelector('.strength-bar');
-        const loadingModal = document.getElementById('loadingModal');
-        const successToast = document.getElementById('successToast');
-        const errorToast = document.getElementById('errorToast');
+    // DOM Elements
+    const step1Form = document.getElementById('registrationForm');
+    const step2Form = document.getElementById('step2Form');
+    const submitBtn = document.getElementById('submitBtn');
+    const passwordMatch = document.getElementById('passwordMatch');
+    const strengthText = document.getElementById('strengthText');
+    const loadingModal = document.getElementById('loadingModal');
+    const successToast = document.getElementById('successToast');
+    const errorToast = document.getElementById('errorToast');
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            updateProgress();
-        });
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        setupEventListeners();
+        updateProgress();
+    });
 
-        function setupEventListeners() {
-            // Password validation
-            document.getElementById('password').addEventListener('input', checkPasswordStrength);
-            document.getElementById('confirmPassword').addEventListener('input', checkPasswordMatch);
-            
-            // Form validation
+    function setupEventListeners() {
+        // Password validation
+        const passwordInput = document.getElementById('password');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', checkPasswordStrength);
+        }
+        
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        if (confirmPasswordInput) {
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+        }
+        
+        // Form validation
+        if (step1Form) {
             step1Form.addEventListener('input', validateStep1);
+        }
+        
+        if (step2Form) {
             step2Form.addEventListener('input', validateStep2);
-            
-            // Aadhaar formatting
-            document.getElementById('aadhaar').addEventListener('input', formatAadhaar);
-            
-            // IFSC validation
-            document.getElementById('ifsc').addEventListener('input', validateIFSC);
+        }
+        
+        // Aadhaar formatting
+        const aadhaarInput = document.getElementById('aadhaar');
+        if (aadhaarInput) {
+            aadhaarInput.addEventListener('input', formatAadhaar);
+        }
+        
+        // IFSC validation
+        const ifscInput = document.getElementById('ifsc');
+        if (ifscInput) {
+            ifscInput.addEventListener('input', validateIFSC);
+        }
+    }
+
+    function formatAadhaar(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 12) value = value.substr(0, 12);
+        if (value.length > 8) {
+            value = value.replace(/(\d{4})(\d{4})(\d{0,4})/, '$1 $2 $3');
+        } else if (value.length > 4) {
+            value = value.replace(/(\d{4})(\d{0,4})/, '$1 $2');
+        }
+        e.target.value = value.trim();
+    }
+
+    function validateIFSC(e) {
+        const ifsc = e.target.value.toUpperCase();
+        e.target.value = ifsc;
+        const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+        if (ifsc.length === 11 && !ifscRegex.test(ifsc)) {
+            showError('Please enter a valid IFSC code');
+        }
+    }
+
+    function checkPasswordStrength() {
+        const password = document.getElementById('password').value;
+        const strengthBar = document.querySelector('.strength-bar');
+        
+        if (!strengthText || !strengthBar) return;
+        
+        let strength = 0;
+        let text = 'Weak';
+        let color = '#dc3545';
+        let width = '20%';
+
+        if (password.length >= 6) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        switch(strength) {
+            case 0:
+            case 1:
+                text = 'Weak';
+                color = '#dc3545';
+                width = '20%';
+                break;
+            case 2:
+                text = 'Fair';
+                color = '#fd7e14';
+                width = '40%';
+                break;
+            case 3:
+                text = 'Good';
+                color = '#ffc107';
+                width = '70%';
+                break;
+            case 4:
+                text = 'Strong';
+                color = '#28a745';
+                width = '100%';
+                break;
         }
 
-        function formatAadhaar(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 12) value = value.substr(0, 12);
-            if (value.length > 8) {
-                value = value.replace(/(\d{4})(\d{4})(\d{0,4})/, '$1 $2 $3');
-            } else if (value.length > 4) {
-                value = value.replace(/(\d{4})(\d{0,4})/, '$1 $2');
-            }
-            e.target.value = value.trim();
+        strengthText.textContent = `Password strength: ${text}`;
+        
+        // Create a style element for the strength bar
+        let styleElement = document.getElementById('strength-bar-style');
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = 'strength-bar-style';
+            document.head.appendChild(styleElement);
         }
-
-        function validateIFSC(e) {
-            const ifsc = e.target.value.toUpperCase();
-            e.target.value = ifsc;
-            const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-            if (ifsc.length === 11 && !ifscRegex.test(ifsc)) {
-                showError('Please enter a valid IFSC code');
+        
+        styleElement.textContent = `
+            .strength-bar::after {
+                width: ${width} !important;
+                background-color: ${color} !important;
             }
+        `;
+    }
+
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (!passwordMatch) return;
+        
+        if (confirmPassword.length === 0) {
+            passwordMatch.style.opacity = '0';
+            return;
         }
-
-        function checkPasswordStrength() {
-            const password = document.getElementById('password').value;
-            let strength = 0;
-            let text = 'Weak';
-            let color = '#dc3545';
-            let width = '20%';
-
-            if (password.length >= 6) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-            switch(strength) {
-                case 0:
-                case 1:
-                    text = 'Weak';
-                    color = '#dc3545';
-                    width = '20%';
-                    break;
-                case 2:
-                    text = 'Fair';
-                    color = '#fd7e14';
-                    width = '40%';
-                    break;
-                case 3:
-                    text = 'Good';
-                    color = '#ffc107';
-                    width = '70%';
-                    break;
-                case 4:
-                    text = 'Strong';
-                    color = '#28a745';
-                    width = '100%';
-                    break;
-            }
-
-            strengthText.textContent = `Password strength: ${text}`;
-            strengthBar.style.setProperty('--strength-color', color);
-            strengthBar.querySelector('::after').style.width = width;
-            strengthBar.querySelector('::after').style.backgroundColor = color;
+        
+        if (password === confirmPassword) {
+            passwordMatch.innerHTML = '<i class="fas fa-check"></i> <span>Passwords match</span>';
+            passwordMatch.style.color = '#28a745';
+            passwordMatch.style.opacity = '1';
+        } else {
+            passwordMatch.innerHTML = '<i class="fas fa-times"></i> <span>Passwords do not match</span>';
+            passwordMatch.style.color = '#dc3545';
+            passwordMatch.style.opacity = '1';
         }
+    }
 
-        function checkPasswordMatch() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const matchDiv = document.getElementById('passwordMatch');
-            
-            if (confirmPassword.length === 0) {
-                matchDiv.style.opacity = '0';
-                return;
-            }
-            
-            if (password === confirmPassword) {
-                matchDiv.innerHTML = '<i class="fas fa-check"></i> <span>Passwords match</span>';
-                matchDiv.style.color = '#28a745';
-                matchDiv.style.opacity = '1';
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+        
+        const button = field.nextElementSibling;
+        if (field.type === 'password') {
+            field.type = 'text';
+            button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        } else {
+            field.type = 'password';
+            button.innerHTML = '<i class="fas fa-eye"></i>';
+        }
+    }
+
+    function validateStep1() {
+        const requiredFields = ['fullName', 'phone', 'aadhaar', 'state', 'district', 'village'];
+        const isValid = requiredFields.every(field => {
+            const element = document.getElementById(field);
+            return element && element.value.trim().length > 0;
+        });
+        
+        const phoneElement = document.getElementById('phone');
+        const aadhaarElement = document.getElementById('aadhaar');
+        
+        if (!phoneElement || !aadhaarElement) return false;
+        
+        const phone = phoneElement.value;
+        const aadhaar = aadhaarElement.value.replace(/\s/g, '');
+        
+        if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+            return false;
+        }
+        
+        if (aadhaar.length !== 12 || !/^\d{12}$/.test(aadhaar)) {
+            return false;
+        }
+        
+        return isValid;
+    }
+
+    function validateStep2() {
+        const requiredFields = ['landSize', 'landType', 'annualIncome', 'bankAccount', 'ifsc', 'bankName', 'password', 'confirmPassword'];
+        const isValid = requiredFields.every(field => {
+            const element = document.getElementById(field);
+            return element && element.value.trim().length > 0;
+        });
+        
+        const crops = document.getElementById('crops');
+        if (!crops) return false;
+        
+        const selectedCrops = Array.from(crops.selectedOptions).map(option => option.value);
+        if (selectedCrops.length === 0) return false;
+        
+        const terms = document.getElementById('terms');
+        if (!terms || !terms.checked) return false;
+        
+        const password = document.getElementById('password')?.value;
+        const confirmPassword = document.getElementById('confirmPassword')?.value;
+        if (!password || !confirmPassword || password !== confirmPassword) return false;
+        
+        return isValid;
+    }
+
+    function nextStep() {
+        if (!validateStep1()) {
+            showError('Please fill all required fields correctly');
+            return;
+        }
+        
+        // Save step 1 data
+        farmerData = {
+            full_name: document.getElementById('fullName').value.trim(),
+            mobile_number: document.getElementById('phone').value.trim(),
+            email: document.getElementById('email').value.trim() || null,
+            aadhaar: document.getElementById('aadhaar').value.replace(/\s/g, ''),
+            state: document.getElementById('state').value,
+            district: document.getElementById('district').value.trim(),
+            village: document.getElementById('village').value.trim(),
+            language: document.getElementById('language').value
+        };
+        
+        currentStep = 2;
+        updateProgress();
+        showStep(2);
+    }
+
+    function prevStep() {
+        currentStep = 1;
+        updateProgress();
+        showStep(1);
+    }
+
+    function showStep(stepNumber) {
+        // Hide all steps
+        document.querySelectorAll('.form-step').forEach(step => {
+            step.classList.remove('active');
+        });
+        
+        // Show current step
+        const currentStepElement = document.querySelector(`.form-step[data-step="${stepNumber}"]`);
+        if (currentStepElement) {
+            currentStepElement.classList.add('active');
+        }
+        
+        // Update progress line
+        const progressLines = document.querySelectorAll('.progress-line');
+        progressLines.forEach((line, index) => {
+            if (index < stepNumber - 1) {
+                line.style.setProperty('--line-width', '100%');
             } else {
-                matchDiv.innerHTML = '<i class="fas fa-times"></i> <span>Passwords do not match</span>';
-                matchDiv.style.color = '#dc3545';
-                matchDiv.style.opacity = '1';
+                line.style.setProperty('--line-width', '0%');
             }
-        }
+        });
+    }
 
-        function togglePassword(fieldId) {
-            const field = document.getElementById(fieldId);
-            const button = field.nextElementSibling;
-            if (field.type === 'password') {
-                field.type = 'text';
-                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            } else {
-                field.type = 'password';
-                button.innerHTML = '<i class="fas fa-eye"></i>';
-            }
-        }
-
-        function validateStep1() {
-            const requiredFields = ['fullName', 'phone', 'aadhaar', 'state', 'district', 'village'];
-            const isValid = requiredFields.every(field => {
-                const value = document.getElementById(field).value.trim();
-                return value.length > 0;
-            });
+    function updateProgress() {
+        const steps = document.querySelectorAll('.progress-step');
+        
+        steps.forEach((step, index) => {
+            const stepNumber = parseInt(step.dataset.step);
             
-            const phone = document.getElementById('phone').value;
-            const aadhaar = document.getElementById('aadhaar').value.replace(/\s/g, '');
-            
-            if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-                return false;
-            }
-            
-            if (aadhaar.length !== 12 || !/^\d{12}$/.test(aadhaar)) {
-                return false;
-            }
-            
-            return isValid;
-        }
-
-        function validateStep2() {
-            const requiredFields = ['landSize', 'landType', 'annualIncome', 'bankAccount', 'ifsc', 'bankName', 'password', 'confirmPassword'];
-            const isValid = requiredFields.every(field => {
-                const value = document.getElementById(field).value.trim();
-                return value.length > 0;
-            });
-            
-            const crops = document.getElementById('crops');
-            const selectedCrops = Array.from(crops.selectedOptions).map(option => option.value);
-            if (selectedCrops.length === 0) return false;
-            
-            const terms = document.getElementById('terms').checked;
-            if (!terms) return false;
-            
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            if (password !== confirmPassword) return false;
-            
-            return isValid;
-        }
-
-        function nextStep() {
-            if (!validateStep1()) {
-                showError('Please fill all required fields correctly');
-                return;
-            }
-            
-            // Save step 1 data
-            farmerData = {
-                full_name: document.getElementById('fullName').value.trim(),
-                mobile_number: document.getElementById('phone').value.trim(),
-                email: document.getElementById('email').value.trim() || null,
-                aadhaar: document.getElementById('aadhaar').value.replace(/\s/g, ''),
-                state: document.getElementById('state').value,
-                district: document.getElementById('district').value.trim(),
-                village: document.getElementById('village').value.trim(),
-                language: document.getElementById('language').value
-            };
-            
-            currentStep = 2;
-            updateProgress();
-            showStep(2);
-        }
-
-        function prevStep() {
-            currentStep = 1;
-            updateProgress();
-            showStep(1);
-        }
-
-        function showStep(stepNumber) {
-            // Hide all steps
-            document.querySelectorAll('.form-step').forEach(step => {
+            if (stepNumber < currentStep) {
                 step.classList.remove('active');
-            });
-            
-            // Show current step
-            document.querySelector(`.form-step[data-step="${stepNumber}"]`).classList.add('active');
-            
-            // Update progress line
-            const progressLines = document.querySelectorAll('.progress-line');
-            progressLines.forEach((line, index) => {
-                if (index < stepNumber - 1) {
-                    line.style.setProperty('--line-width', '100%');
-                } else {
-                    line.style.setProperty('--line-width', '0%');
-                }
-            });
-        }
-
-        function updateProgress() {
-            const steps = document.querySelectorAll('.progress-step');
-            
-            steps.forEach((step, index) => {
-                const stepNumber = parseInt(step.dataset.step);
-                
-                if (stepNumber < currentStep) {
-                    step.classList.remove('active');
-                    step.classList.add('completed');
-                } else if (stepNumber === currentStep) {
-                    step.classList.add('active');
-                    step.classList.remove('completed');
-                } else {
-                    step.classList.remove('active', 'completed');
-                }
-            });
-        }
-
-        async function submitRegistration() {
-            if (!validateStep2()) {
-                showError('Please fill all required fields correctly');
-                return;
+                step.classList.add('completed');
+            } else if (stepNumber === currentStep) {
+                step.classList.add('active');
+                step.classList.remove('completed');
+            } else {
+                step.classList.remove('active', 'completed');
             }
-            
-            // Collect all data
-            const crops = document.getElementById('crops');
-            const selectedCrops = Array.from(crops.selectedOptions).map(option => option.value);
-            
-            const registrationData = {
-                ...farmerData,
-                password: document.getElementById('password').value,
-                total_land_acres: parseFloat(document.getElementById('landSize').value),
-                land_type: document.getElementById('landType').value,
-                main_crops: selectedCrops.join(', '),
-                annual_income: parseFloat(document.getElementById('annualIncome').value),
-                bank_account_number: document.getElementById('bankAccount').value.trim(),
-                bank_name: document.getElementById('bankName').value.trim(),
-                ifsc_code: document.getElementById('ifsc').value.trim()
-            };
-            
-            // Show loading modal
+        });
+    }
+
+    async function submitRegistration() {
+        if (!validateStep2()) {
+            showError('Please fill all required fields correctly');
+            return;
+        }
+        
+        // Collect all data
+        const crops = document.getElementById('crops');
+        if (!crops) return;
+        
+        const selectedCrops = Array.from(crops.selectedOptions).map(option => option.value);
+        
+        const registrationData = {
+            ...farmerData,
+            password: document.getElementById('password').value,
+            total_land_acres: parseFloat(document.getElementById('landSize').value),
+            land_type: document.getElementById('landType').value,
+            main_crops: selectedCrops.join(', '),
+            annual_income: parseFloat(document.getElementById('annualIncome').value),
+            bank_account_number: document.getElementById('bankAccount').value.trim(),
+            bank_name: document.getElementById('bankName').value.trim(),
+            ifsc_code: document.getElementById('ifsc').value.trim()
+        };
+        
+        // Show loading modal
+        if (loadingModal) {
             loadingModal.style.display = 'flex';
+        }
+        
+        try {
+            // Register user
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(registrationData)
+            });
             
-            try {
-                // Register user
-                const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(registrationData)
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    // Registration successful
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Registration successful
+                if (loadingModal) {
                     loadingModal.style.display = 'none';
-                    
-                    // Show farmer ID
-                    document.getElementById('generatedFarmerId').textContent = data.farmer_id;
-                    
-                    // Move to success step
-                    currentStep = 3;
-                    updateProgress();
-                    showStep(3);
-                    
-                    showSuccess('Account created successfully!');
-                    
-                    // Store user data in localStorage for login
-                    localStorage.setItem('farmerData', JSON.stringify({
-                        mobile_number: registrationData.mobile_number,
-                        farmer_id: data.farmer_id,
-                        full_name: data.full_name
-                    }));
-                    
-                } else {
-                    throw new Error(data.detail || 'Registration failed');
                 }
                 
-            } catch (error) {
-                loadingModal.style.display = 'none';
-                showError(error.message);
+                // Show farmer ID
+                const farmerIdElement = document.getElementById('generatedFarmerId');
+                if (farmerIdElement) {
+                    farmerIdElement.textContent = data.farmer_id;
+                }
+                
+                // Move to success step
+                currentStep = 3;
+                updateProgress();
+                showStep(3);
+                
+                showSuccess('Account created successfully!');
+                
+                // Store user data in localStorage for login
+                localStorage.setItem('farmerData', JSON.stringify({
+                    mobile_number: registrationData.mobile_number,
+                    farmer_id: data.farmer_id,
+                    full_name: data.full_name
+                }));
+                
+            } else {
+                throw new Error(data.detail || 'Registration failed');
             }
+            
+        } catch (error) {
+            if (loadingModal) {
+                loadingModal.style.display = 'none';
+            }
+            showError(error.message);
         }
+    }
 
-        function copyFarmerId() {
-            const farmerId = document.getElementById('generatedFarmerId').textContent;
-            navigator.clipboard.writeText(farmerId).then(() => {
-                showSuccess('Farmer ID copied to clipboard!');
-            });
+    function copyFarmerId() {
+        const farmerIdElement = document.getElementById('generatedFarmerId');
+        if (!farmerIdElement) return;
+        
+        const farmerId = farmerIdElement.textContent;
+        navigator.clipboard.writeText(farmerId).then(() => {
+            showSuccess('Farmer ID copied to clipboard!');
+        });
+    }
+
+    function redirectToLogin() {
+        window.location.href = 'index.html';
+    }
+
+    function showSuccess(message) {
+        const toastMessage = document.getElementById('toastMessage');
+        if (toastMessage) {
+            toastMessage.textContent = message;
         }
-
-        function redirectToLogin() {
-            window.location.href = 'index.html';
-        }
-
-        function showSuccess(message) {
-            document.getElementById('toastMessage').textContent = message;
+        
+        if (successToast) {
             successToast.classList.add('show');
             
             setTimeout(() => {
                 successToast.classList.remove('show');
             }, 3000);
         }
+    }
 
-        function showError(message) {
-            document.getElementById('errorMessage').textContent = message;
+    function showError(message) {
+        const errorMessageElement = document.getElementById('errorMessage');
+        if (errorMessageElement) {
+            errorMessageElement.textContent = message;
+        }
+        
+        if (errorToast) {
             errorToast.classList.add('show');
             
             setTimeout(() => {
                 errorToast.classList.remove('show');
             }, 5000);
         }
+    }
 
-        function hideToast() {
+    function hideToast() {
+        if (successToast) {
             successToast.classList.remove('show');
+        }
+        if (errorToast) {
             errorToast.classList.remove('show');
         }
+    }
 
-        // Add CSS for progress line animation
-        const style = document.createElement('style');
-        style.textContent = `
-            .progress-line::after {
-                width: var(--line-width, 0%);
-                transition: width 0.5s ease;
-            }
-            
-            .strength-bar::after {
-                width: var(--strength-width, 20%);
-                background-color: var(--strength-color, #dc3545);
-                transition: all 0.3s ease;
-            }
-        `;
-        document.head.appendChild(style);
-    </script>
+    // Add CSS for progress line animation
+    const style = document.createElement('style');
+    style.textContent = `
+        .progress-line::after {
+            width: var(--line-width, 0%);
+            transition: width 0.5s ease;
+        }
+        
+        .strength-bar::after {
+            width: 20%;
+            background-color: #dc3545;
+            transition: all 0.3s ease;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
 </body>
 </html>
