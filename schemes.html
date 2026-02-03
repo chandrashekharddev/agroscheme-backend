@@ -456,49 +456,49 @@
                 }
                 
                 schemeCard.innerHTML = `
-                    <div class="scheme-badge ${badgeClass}">${statusText}</div>
-                    <div class="scheme-header">
-                        <div class="scheme-icon">
-                            ${getSchemeIcon(scheme.scheme_type)}
-                        </div>
-                        <div class="scheme-type">${scheme.scheme_type === 'central' ? 'Central' : 'State'}</div>
-                    </div>
-                    
-                    <div class="scheme-body">
-                        <h3>${scheme.scheme_name}</h3>
-                        <p class="scheme-description">
-                            ${scheme.description ? scheme.description.substring(0, 100) : 'No description available'}...
-                        </p>
-                        
-                        <div class="scheme-details">
-                            <div class="detail">
-                                <i class="fas fa-rupee-sign"></i>
-                                <span>${scheme.benefit_amount || 'Varies'}</span>
-                            </div>
-                            <div class="detail">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span>${scheme.last_date ? formatDate(scheme.last_date) : 'Ongoing'}</span>
-                            </div>
-                            <div class="detail">
-                                <i class="fas fa-percentage"></i>
-                                <span>Check Eligibility</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="scheme-footer">
-                        ${isApplied ? 
-                            `<button class="btn-outline" onclick="trackApplication(${userApp.id})">
-                                <i class="fas fa-eye"></i>
-                                Track Status
-                            </button>` :
-                            `<button class="btn-primary" onclick="showSchemeDetails(${scheme.id})">
-                                <i class="fas fa-info-circle"></i>
-                                View Details
-                            </button>`
-                        }
-                    </div>
-                `;
+    <div class="scheme-badge ${badgeClass}">${statusText}</div>
+    <div class="scheme-header">
+        <div class="scheme-icon">
+            ${getSchemeIcon(scheme.scheme_type)}
+        </div>
+        <div class="scheme-type">${scheme.scheme_type === 'central' ? 'Central' : 'State'}</div>
+    </div>
+    
+    <div class="scheme-body">
+        <h3>${scheme.scheme_name}</h3>
+        <p class="scheme-description">
+            ${scheme.description ? scheme.description.substring(0, 100) : 'No description available'}...
+        </p>
+        
+        <div class="scheme-details">
+            <div class="detail">
+                <i class="fas fa-rupee-sign"></i>
+                <span>${scheme.benefit_amount || 'Varies'}</span>
+            </div>
+            <div class="detail">
+                <i class="fas fa-calendar-alt"></i>
+                <span>${scheme.last_date ? formatDate(scheme.last_date) : 'Ongoing'}</span>
+            </div>
+            <div class="detail">
+                <i class="fas fa-info-circle"></i>
+                <span>View Details</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="scheme-footer">
+        ${isApplied ? 
+            `<button class="btn-outline" onclick="trackApplication(${userApp.id})">
+                <i class="fas fa-eye"></i>
+                Track Status
+            </button>` :
+            `<button class="btn-primary" onclick="showSchemeDetails(${scheme.id})">
+                <i class="fas fa-info-circle"></i>
+                View Details
+            </button>`
+        }
+    </div>
+`;
                 
                 schemeGrid.appendChild(schemeCard);
             });
@@ -531,194 +531,284 @@
         }
 
         // Show scheme details modal
-        async function showSchemeDetails(schemeId) {
-            try {
-                const token = checkAuth();
-                currentSchemeId = schemeId;
-                
-                // Get scheme details
-                const schemeResponse = await fetch(`${API_BASE_URL}/schemes/${schemeId}`);
-                if (!schemeResponse.ok) throw new Error('Failed to load scheme');
-                const scheme = await schemeResponse.json();
-                
-                // Check eligibility
-                const eligibilityResponse = await fetch(`${API_BASE_URL}/schemes/${schemeId}/check-eligibility`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                const eligibility = eligibilityResponse.ok ? await eligibilityResponse.json() : null;
-                
-                // Update modal content
-                updateModalContent(scheme, eligibility);
-                
-                // Show modal
-                document.getElementById('schemeDetailsModal').style.display = 'block';
-            } catch (error) {
-                console.error('Error loading scheme details:', error);
-                showToast('Error', 'Failed to load scheme details', 'error');
+      async function showSchemeDetails(schemeId) {
+    try {
+        const token = checkAuth();
+        currentSchemeId = schemeId;
+        
+        // Show loading state
+        const confirmBtn = document.getElementById('confirmApplyBtn');
+        const applyBtnText = document.getElementById('applyBtnText');
+        confirmBtn.disabled = true;
+        applyBtnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking Eligibility...';
+        
+        // Get scheme details
+        const schemeResponse = await fetch(`${API_BASE_URL}/schemes/${schemeId}`);
+        if (!schemeResponse.ok) throw new Error('Failed to load scheme');
+        const scheme = await schemeResponse.json();
+        
+        // Check eligibility
+        let eligibility = null;
+        try {
+            const eligibilityResponse = await fetch(`${API_BASE_URL}/schemes/${schemeId}/check-eligibility`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (eligibilityResponse.ok) {
+                eligibility = await eligibilityResponse.json();
             }
+        } catch (eligibilityError) {
+            console.warn('Could not fetch eligibility:', eligibilityError);
+            // Continue without eligibility data
         }
-
-        function updateModalContent(scheme, eligibility) {
-            // Update basic info
-            document.getElementById('modalSchemeTitle').textContent = scheme.scheme_name;
-            document.getElementById('modalSchemeIcon').innerHTML = getSchemeIcon(scheme.scheme_type);
-            document.getElementById('modalSchemeDescription').textContent = scheme.description || 'No description available';
-            
-            // Update tags
-            const tagsContainer = document.getElementById('modalSchemeTags');
-            tagsContainer.innerHTML = '';
-            
-            if (eligibility && eligibility.eligible) {
-                tagsContainer.innerHTML += `<span class="tag tag-success">Eligible (${eligibility.match_percentage}%)</span>`;
-            } else {
-                tagsContainer.innerHTML += `<span class="tag tag-warning">Check Eligibility</span>`;
-            }
-            
-            tagsContainer.innerHTML += `
-                <span class="tag">${scheme.scheme_type === 'central' ? 'Central Government' : 'State Government'}</span>
-                <span class="tag tag-highlight">${scheme.benefit_amount || 'Benefits Vary'}</span>
-            `;
-            
-            // Update benefits
-            const benefitsList = document.getElementById('benefitsList');
-            benefitsList.innerHTML = `
-                <li>${scheme.benefit_amount || 'Financial assistance provided'}</li>
-                <li>Direct transfer to bank account</li>
-                <li>Government verified scheme</li>
-            `;
-            
-            // Update dates
-            const datesGrid = document.getElementById('datesGrid');
-            datesGrid.innerHTML = `
-                <div class="date-item">
-                    <i class="fas fa-hourglass-start"></i>
-                    <div>
-                        <strong>Application Start</strong>
-                        <p>Always Open</p>
-                    </div>
-                </div>
-                <div class="date-item">
-                    <i class="fas fa-hourglass-end"></i>
-                    <div>
-                        <strong>Last Date</strong>
-                        <p>${scheme.last_date ? formatDate(scheme.last_date) : 'Not Specified'}</p>
-                    </div>
-                </div>
-                <div class="date-item">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <div>
-                        <strong>Disbursement</strong>
-                        <p>After Approval</p>
-                    </div>
-                </div>
-            `;
-            
-            // Update eligibility status
-            const eligibilityStatus = document.getElementById('eligibilityStatus');
-            if (eligibility) {
-                eligibilityStatus.innerHTML = `
-                    ${eligibility.eligible ? `
-                        <div class="eligibility-item success">
-                            <i class="fas fa-check-circle"></i>
-                            <div>
-                                <strong>✓ Eligible</strong>
-                                <p>${eligibility.match_percentage}% criteria match</p>
-                            </div>
-                        </div>
-                    ` : `
-                        <div class="eligibility-item error">
-                            <i class="fas fa-times-circle"></i>
-                            <div>
-                                <strong>✗ Not Eligible</strong>
-                                <p>${eligibility.match_percentage}% criteria match</p>
-                            </div>
-                        </div>
-                    `}
-                    ${eligibility.reasons && eligibility.reasons.length > 0 ? `
-                        <div class="eligibility-item info">
-                            <i class="fas fa-info-circle"></i>
-                            <div>
-                                <strong>Requirements</strong>
-                                <p>${eligibility.reasons.join(', ')}</p>
-                            </div>
-                        </div>
-                    ` : ''}
-                `;
-            } else {
-                eligibilityStatus.innerHTML = `
-                    <div class="eligibility-item info">
-                        <i class="fas fa-info-circle"></i>
-                        <div>
-                            <strong>Check Eligibility</strong>
-                            <p>Click Apply to check eligibility</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Update required documents
-            const requiredDocs = document.getElementById('requiredDocuments');
+        
+        // Calculate eligibility percentage based on available documents
+        let eligibilityPercentage = 0;
+        let missingDocs = [];
+        
+        if (scheme.required_documents && Array.isArray(scheme.required_documents)) {
             const userDocTypes = userDocuments.filter(d => d.verified).map(d => d.document_type);
-            requiredDocs.innerHTML = '';
+            const requiredDocs = scheme.required_documents;
+            const matchingDocs = requiredDocs.filter(doc => userDocTypes.includes(doc));
+            eligibilityPercentage = Math.round((matchingDocs.length / requiredDocs.length) * 100);
+            missingDocs = requiredDocs.filter(doc => !userDocTypes.includes(doc));
+        }
+        
+        // Store calculated eligibility if API didn't provide it
+        if (!eligibility) {
+            eligibility = {
+                eligible: eligibilityPercentage >= 70, // Assuming 70% threshold
+                match_percentage: eligibilityPercentage,
+                missing_documents: missingDocs,
+                reasons: missingDocs.map(doc => `Missing ${formatDocumentType(doc)}`)
+            };
+        }
+        
+        // Update modal content with eligibility info
+        updateModalContent(scheme, eligibility);
+        
+        // Show modal
+        document.getElementById('schemeDetailsModal').style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error loading scheme details:', error);
+        showToast('Error', 'Failed to load scheme details', 'error');
+    }
+}
+        function formatDocumentType(docType) {
+    const documentNames = {
+        'aadhaar': 'Aadhaar Card',
+        'pan': 'PAN Card',
+        'land_record': 'Land Record',
+        'bank_passbook': 'Bank Passbook',
+        'income_certificate': 'Income Certificate',
+        'domicile': 'Domicile Certificate',
+        'other': 'Other Document'
+    };
+    return documentNames[docType] || docType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+    function updateModalContent(scheme, eligibility) {
+    // Update basic info
+    document.getElementById('modalSchemeTitle').textContent = scheme.scheme_name;
+    document.getElementById('modalSchemeIcon').innerHTML = getSchemeIcon(scheme.scheme_type);
+    document.getElementById('modalSchemeDescription').textContent = scheme.description || 'No description available';
+    
+    // Update tags
+    const tagsContainer = document.getElementById('modalSchemeTags');
+    tagsContainer.innerHTML = '';
+    
+    // Add eligibility percentage badge
+    let eligibilityClass = 'tag-warning';
+    if (eligibility.match_percentage >= 70) {
+        eligibilityClass = 'tag-success';
+    } else if (eligibility.match_percentage <= 30) {
+        eligibilityClass = 'tag-error';
+    }
+
+    tagsContainer.innerHTML += `
+        <span class="tag ${eligibilityClass}">
+            <i class="fas fa-percentage"></i>
+            ${eligibility.match_percentage}% Match
+        </span>
+    `;
+
+    if (eligibility.eligible) {
+        tagsContainer.innerHTML += `<span class="tag tag-success">Eligible</span>`;
+    } else {
+        tagsContainer.innerHTML += `<span class="tag tag-warning">Check Requirements</span>`;
+    }
+
+    tagsContainer.innerHTML += `
+        <span class="tag">${scheme.scheme_type === 'central' ? 'Central Government' : 'State Government'}</span>
+        <span class="tag tag-highlight">${scheme.benefit_amount || 'Benefits Vary'}</span>
+    `;
+    
+    // Update benefits
+    const benefitsList = document.getElementById('benefitsList');
+    benefitsList.innerHTML = `
+        <li>${scheme.benefit_amount || 'Financial assistance provided'}</li>
+        <li>Direct transfer to bank account</li>
+        <li>Government verified scheme</li>
+    `;
+    
+    // Update dates
+    const datesGrid = document.getElementById('datesGrid');
+    datesGrid.innerHTML = `
+        <div class="date-item">
+            <i class="fas fa-hourglass-start"></i>
+            <div>
+                <strong>Application Start</strong>
+                <p>Always Open</p>
+            </div>
+        </div>
+        <div class="date-item">
+            <i class="fas fa-hourglass-end"></i>
+            <div>
+                <strong>Last Date</strong>
+                <p>${scheme.last_date ? formatDate(scheme.last_date) : 'Not Specified'}</p>
+            </div>
+        </div>
+        <div class="date-item">
+            <i class="fas fa-money-bill-wave"></i>
+            <div>
+                <strong>Disbursement</strong>
+                <p>After Approval</p>
+            </div>
+        </div>
+    `;
+    
+    // Update eligibility status
+    const eligibilityStatus = document.getElementById('eligibilityStatus');
+    if (eligibility) {
+        // Determine progress bar class based on percentage
+        let progressClass = 'progress-30';
+        if (eligibility.match_percentage >= 70) progressClass = 'progress-70';
+        else if (eligibility.match_percentage >= 50) progressClass = 'progress-50';
+        
+        // Determine status text and icon
+        let statusText = '✗ Not Eligible';
+        let statusIcon = 'times-circle';
+        let statusClass = 'error';
+        
+        if (eligibility.eligible) {
+            statusText = '✓ Eligible';
+            statusIcon = 'check-circle';
+            statusClass = 'success';
+        } else if (eligibility.match_percentage >= 50) {
+            statusText = '⚠ Partially Eligible';
+            statusIcon = 'exclamation-circle';
+            statusClass = 'warning';
+        }
+        
+        eligibilityStatus.innerHTML = `
+            <div class="eligibility-item ${statusClass}">
+                <i class="fas fa-${statusIcon}"></i>
+                <div>
+                    <strong>${statusText}</strong>
+                    <p>Based on your profile and documents</p>
+                </div>
+            </div>
             
-            if (scheme.required_documents && Array.isArray(scheme.required_documents)) {
-                scheme.required_documents.forEach(docType => {
-                    const hasDoc = userDocTypes.includes(docType);
-                    requiredDocs.innerHTML += `
-                        <div class="document-item ${hasDoc ? 'verified' : 'missing'}">
-                            <i class="fas fa-${getDocumentIcon(docType)}"></i>
-                            <div>
-                                <strong>${formatDocumentType(docType)}</strong>
-                                <p>${hasDoc ? '✓ Uploaded & Verified' : '✗ Required'}</p>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
+            <div class="eligibility-progress">
+                <div class="eligibility-score">
+                    <span>Eligibility Score</span>
+                    <strong>${eligibility.match_percentage}%</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill ${progressClass}"></div>
+                </div>
+                <p class="eligibility-hint">
+                    ${eligibility.match_percentage >= 70 ? 'You meet most requirements' : 
+                      eligibility.match_percentage >= 50 ? 'You meet some requirements' : 
+                      'You need more documents'}
+                </p>
+            </div>
             
-            // Update application preview
-            const applicationPreview = document.getElementById('applicationPreview');
-            applicationPreview.innerHTML = `
-                <div class="preview-row">
-                    <span>Name:</span>
-                    <strong>${currentUser.full_name}</strong>
+            ${eligibility.reasons && eligibility.reasons.length > 0 ? `
+                <div class="eligibility-item info">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <strong>${eligibility.eligible ? 'Requirements Met' : 'Requirements Needed'}</strong>
+                        <p>${eligibility.reasons.join(', ')}</p>
+                    </div>
                 </div>
-                <div class="preview-row">
-                    <span>Farmer ID:</span>
-                    <strong>${currentUser.farmer_id}</strong>
+            ` : ''}
+        `;
+    } else {
+        eligibilityStatus.innerHTML = `
+            <div class="eligibility-item info">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>Check Eligibility</strong>
+                    <p>Click Apply to check eligibility</p>
                 </div>
-                <div class="preview-row">
-                    <span>Location:</span>
-                    <strong>${currentUser.village || ''}, ${currentUser.district}</strong>
-                </div>
-                <div class="preview-row">
-                    <span>Expected Benefit:</span>
-                    <strong class="highlight">${scheme.benefit_amount || 'To be determined'}</strong>
+            </div>
+        `;
+    }
+    
+    // Update required documents
+    const requiredDocs = document.getElementById('requiredDocuments');
+    const userDocTypes = userDocuments.filter(d => d.verified).map(d => d.document_type);
+    requiredDocs.innerHTML = '';
+    
+    if (scheme.required_documents && Array.isArray(scheme.required_documents)) {
+        scheme.required_documents.forEach(docType => {
+            const hasDoc = userDocTypes.includes(docType);
+            requiredDocs.innerHTML += `
+                <div class="document-item ${hasDoc ? 'verified' : 'missing'}">
+                    <i class="fas fa-${getDocumentIcon(docType)}"></i>
+                    <div>
+                        <strong>${formatDocumentType(docType)}</strong>
+                        <p>${hasDoc ? '✓ Uploaded & Verified' : '✗ Required'}</p>
+                    </div>
                 </div>
             `;
-            
-            // Update apply button
-            const applyBtn = document.getElementById('confirmApplyBtn');
-            const applyBtnText = document.getElementById('applyBtnText');
-            
-            if (eligibility && !eligibility.eligible) {
-                applyBtn.disabled = true;
-                applyBtn.className = 'btn-disabled';
-                applyBtnText.textContent = 'Not Eligible';
-            } else if (eligibility && eligibility.missing_documents && eligibility.missing_documents.length > 0) {
-                applyBtn.disabled = true;
-                applyBtn.className = 'btn-disabled';
-                applyBtnText.textContent = 'Upload Required Documents';
-                applyBtn.onclick = () => window.location.href = 'upload.html';
-            } else {
-                applyBtn.disabled = false;
-                applyBtn.className = 'btn-primary';
-                applyBtnText.textContent = 'Confirm & Apply';
-                applyBtn.onclick = applyForScheme;
-            }
-        }
+        });
+    }
+    
+    // Update application preview
+    const applicationPreview = document.getElementById('applicationPreview');
+    applicationPreview.innerHTML = `
+        <div class="preview-row">
+            <span>Name:</span>
+            <strong>${currentUser.full_name}</strong>
+        </div>
+        <div class="preview-row">
+            <span>Farmer ID:</span>
+            <strong>${currentUser.farmer_id}</strong>
+        </div>
+        <div class="preview-row">
+            <span>Location:</span>
+            <strong>${currentUser.village || ''}, ${currentUser.district}</strong>
+        </div>
+        <div class="preview-row">
+            <span>Expected Benefit:</span>
+            <strong class="highlight">${scheme.benefit_amount || 'To be determined'}</strong>
+        </div>
+    `;
+    
+    // Update apply button
+    const applyBtn = document.getElementById('confirmApplyBtn');
+    const applyBtnText = document.getElementById('applyBtnText');
+    
+    if (eligibility && !eligibility.eligible) {
+        applyBtn.disabled = true;
+        applyBtn.className = 'btn-disabled';
+        applyBtnText.textContent = 'Not Eligible';
+    } else if (eligibility && eligibility.missing_documents && eligibility.missing_documents.length > 0) {
+        applyBtn.disabled = true;
+        applyBtn.className = 'btn-disabled';
+        applyBtnText.textContent = 'Upload Required Documents';
+        applyBtn.onclick = () => window.location.href = 'upload.html';
+    } else {
+        applyBtn.disabled = false;
+        applyBtn.className = 'btn-primary';
+        applyBtnText.textContent = 'Confirm & Apply';
+        applyBtn.onclick = applyForScheme;
+    }
+}
 
         function getDocumentIcon(docType) {
             const icons = {
@@ -995,6 +1085,22 @@
     </script>
 
     <style>
+        :root {
+    --primary-color: #2e7d32;
+    --primary-light: #e8f5e9;
+    --primary-dark: #1b5e20;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+    --info-color: #2196f3;
+    --gray-50: #f9f9f9;
+    --gray-100: #f5f5f5;
+    --gray-200: #e0e0e0;
+    --gray-300: #bdbdbd;
+    --gray-400: #9e9e9e;
+    --gray-500: #757575;
+    --gray-600: #616161;
+}
         /* Additional styles for dynamic content */
         .loading-spinner {
             display: flex;
@@ -1092,6 +1198,220 @@
                 opacity: 0;
             }
         }
+        /* Eligibility item styles */
+.eligibility-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.eligibility-item.success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.eligibility-item.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.eligibility-item.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.eligibility-item.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+.eligibility-item i {
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+        /* Eligibility progress styles */
+.eligibility-progress {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: var(--gray-50);
+    border-radius: 8px;
+}
+
+.progress-bar {
+    height: 8px;
+    background-color: var(--gray-200);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-70 { 
+    width: 70%; 
+    background-color: var(--success-color); 
+}
+.progress-50 { 
+    width: 50%; 
+    background-color: var(--warning-color); 
+}
+.progress-30 { 
+    width: 30%; 
+    background-color: var(--error-color); 
+}
+
+.eligibility-score {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    margin-bottom: 0.5rem;
+}
+
+.eligibility-hint {
+    font-size: 0.85rem;
+    color: var(--gray-500);
+    margin-top: 0.5rem;
+}
+
+/* Updated tag styles */
+.tag i {
+    margin-right: 4px;
+}
+
+.tag-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.tag-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-color: #ffeaa7;
+}
+
+.tag-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+        .document-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--gray-200);
+}
+
+.document-item.verified {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.document-item.missing {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.document-item i {
+    font-size: 1.2rem;
+    width: 24px;
+}
+
+.document-item.verified i {
+    color: #28a745;
+}
+.preview-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.preview-row:last-child {
+    border-bottom: none;
+}
+
+.preview-row span {
+    color: var(--gray-600);
+}
+.date-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background-color: var(--gray-50);
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.date-item i {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.date-item div {
+    flex: 1;
+}
+
+.date-item strong {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--gray-700);
+}
+.benefits ul {
+    margin: 0.5rem 0 0;
+    padding-left: 1.5rem;
+}
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+@media (max-width: 992px) {
+    .modal-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.benefits li {
+    margin-bottom: 0.5rem;
+    color: var(--gray-700);
+}
+.date-item p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+.preview-row strong {
+    font-weight: 600;
+}
+.document-item.missing i {
+    color: #dc3545;
+}
+.highlight {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+.tag-highlight {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    border-color: var(--primary-color);
+}
     </style>
 </body>
 </html>
